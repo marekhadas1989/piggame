@@ -485,6 +485,7 @@ var app =(function(obj){
 	Play game again with the same people, reset progress bars and other game related stuff
 	 */
 	playAgain:function(){
+		this.drawEmptyDices();
 		$('#users_list').find('tr').removeAttr('class');
 		$('#users_list').find('tbody tr:first').addClass('active');
 
@@ -527,6 +528,7 @@ var app =(function(obj){
 
 	},
 	resetGame:function(){
+		this.drawEmptyDices();
 		$('.players_list').html("");
 		$(".game_box").hide();
 		$('.initial_box').show();
