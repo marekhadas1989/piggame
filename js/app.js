@@ -112,6 +112,7 @@ var app =(function(obj){
 			$('.start_game').on('click',function(){
 
 				//set up initial image and cleanup old players
+				$('.player_name').val("");
 				$('.players_list').html("");
 				$('.player_avatar').attr('src',"./avatars/128x128/128_1.png");
 
