@@ -8,63 +8,64 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="./css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="./css/datatables.min.css"/>
+    <link rel="stylesheet" type="text/css" href="./css/app.css"/>
+      <link href="./css/font-awesome.css" rel="stylesheet">
 
-      <style>
-          html,
-          body {
-              height: 100%;
-          }
-
-          body {
-              display: -ms-flexbox;
-              display: flex;
-              -ms-flex-align: center;
-              align-items: center;
-              padding-top: 40px;
-              padding-bottom: 40px;
-              background-color: #f5f5f5;
-          }
-
-          .game_box {
-              width: 100%;
-              max-width: 730px;
-              padding: 15px;
-              margin: auto;
-          }
-
-          .player_list img{
-              max-width:30px;
-              margin-bottom:5px
-          }
-
-          .player_list span{
-              font-weight:bold;
-              color:#80bdff
-          }
-
-          .user_avatar_selection {
-              width:100px;
-              cursor:pointer;
-              margin:5px;
-          }
-
-          tr.active td{
-              background:#563D7C !important;
-              color:white;
-              font-weight: bold;
-          }
-
-          .remove_player{
-              color:red;
-              cursor:pointer;
-          }
-
-      </style>
-    <title>Hello, world!</title>
+    <title>The Pig Game</title>
   </head>
   <body>
 
-      <div class="modal fade" id="user_avatar" tabindex="-1" role="dialog" aria-labelledby="user_avatar" aria-hidden="true">
+
+  <div class="modal fade" id="settingsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalLongTitle">Settings</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                  </button>
+              </div>
+
+              <div class="modal-body">
+
+                      <div class="custom-control custom-checkbox mb-3">
+                          <input type="checkbox" class="custom-control-input" checked="checked" id="playSounds">
+                          <label class="custom-control-label" for="playSounds">Play Sounds</label>
+                      </div>
+
+                      <div class="custom-control custom-checkbox mb-3">
+                          <input type="checkbox" class="custom-control-input" checked="checked" id="popupAlerts">
+                          <label class="custom-control-label" for="popupAlerts" checked="checked">Pop Up Game Alerts</label>
+                      </div>
+
+                      <div class="custom-control custom-checkbox mb-3">
+                          <input type="checkbox" class="custom-control-input" id="funnyAlerts">
+                          <label class="custom-control-label" for="funnyAlerts">Display Funny Alerts</label>
+                      </div>
+
+                      <hr>
+                        <h6 class="text-center">Cheat Mode</h6>
+                      <hr>
+
+                      <div class="custom-control custom-checkbox mb-3">
+                          <input type="checkbox" class="custom-control-input" id="doubleSixAlways">
+                          <label class="custom-control-label" for="doubleSixAlways">Roll Always "Double 6" For First Player</label>
+                      </div>
+                      <div class="custom-control custom-checkbox mb-3">
+                          <input type="checkbox" class="custom-control-input" id="unluckyPlayer">
+                          <label class="custom-control-label" for="unluckyPlayer">All but "first player" seems to be unlucky more than usually</label>
+                      </div>
+              </div>
+
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                  <button type="button" class="btn btn-primary saveSettings">Save changes</button>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <div class="modal fade" id="user_avatar" tabindex="-1" role="dialog" aria-labelledby="user_avatar" aria-hidden="true">
           <div class="modal-dialog" role="document">
               <div class="modal-content">
                   <div class="modal-header">
@@ -98,9 +99,23 @@
 
       <div class="row start initial_box game_box">
           <div class="col-md-12 text-center" style="border-radius:5px;background:white;padding:40px;border:solid 1px #bcbaba">
+
+              <i class="fas fa-cog settings"></i>
               <h2 style="color:#563D7C">The Pig Game</h2>
-              <img src="./img/dices.png" class="img-fluid">
-              <button class="btn btn-success start_game" style="margin-top:20px">Start Game</button>
+              <img src="./img/dices.png" class="img-fluid" style="max-height:250px">
+
+              <div class="col-md-12" style="margin-top:20px;">
+                  <i class="fa fa-trophy" aria-hidden="true"></i>Hall Of Fame<i class="fa fa-trophy" aria-hidden="true"></i>
+
+                  <div class="col-md-12 text-left player_class"><img src="./avatars/128x128/128_1.png"><span>Steven</span> <b>103</b></div>
+                  <div class="col-md-12 text-left player_class"><img src="./avatars/128x128/128_2.png"><span>Peter</span> <b>10</b></div>
+                  <div class="col-md-12 text-left player_class"><img src="./avatars/128x128/128_3.png"><span>John</span> <b>3</b></div>
+              </div>
+
+              <h1>
+                 <button class="btn btn-success start_game" style="margin-top:20px">Start Game</button>
+              </h1>
+
           </div>
       </div>
 
@@ -178,30 +193,30 @@
 
   </body>
 
-
-    <!-- Optional JavaScript -->
-    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="./js/jquery-3.4.1.min.js" ></script>
     <script src="./js/popper.min.js"></script>
     <script src="./js/bootstrap.min.js"></script>
-	<script src="./js/app.js"></script>
+
+    <!--Proper JS app -->
+    <script src="./js/app.js"></script>
+
+
     <script src="./js/sweetalert2.js"></script>
+    <script type="text/javascript" src="./js/datatables.min.js"></script>
 
 	<script type="text/javascript">
 
-		$(function(){
-		    "use strict"
+	$(function(){
 
-            app.start({
-                sound:true,
-                uncle_good_advice:false
-            });
+	    "use strict"
 
-		})
+        app.start();
+
+	})
 
 
 	</script>
-  <script type="text/javascript" src="./js/datatables.min.js"></script>
+  
 
   </body>
 </html>

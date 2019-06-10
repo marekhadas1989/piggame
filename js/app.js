@@ -1,13 +1,13 @@
 var app =(function(obj){
 
 	return {
-		start:function(options){
-			obj.init(options);
+		start:function(){
+			obj.init();
 		}
 	}
+
 }({
-	uncle_good_advice:true,
-	sound:true,
+	settings:{},
 	minInt:1,
 	maxInt:6,
 	players:[],
@@ -29,13 +29,36 @@ var app =(function(obj){
 
 		console.warn("APP STARTED "+(new Date));
 
-		if("sound" in options) this.sound = options.sound;
-		if("uncle_good_advice" in options) this.uncle_good_advice = options.uncle_good_advice;
-
-		var autoload = ['events','funnyEvents','debug'];
+		var autoload = ['events','restoreSettings'];
 
 		for(var a in autoload){
 			this[autoload[a]]();
+		}
+
+	},
+	restoreSettings:function(){
+
+		var settings = localStorage.getItem('settings')?JSON.parse(localStorage.getItem('settings')):{'playSounds':true,"popupAlerts":true};
+
+		if(Object.keys(settings).length > 2){
+			$('#settingsModal').find('input').each(function() {
+				var option = $(this).attr('id');
+				$(this)[settings[option]?'attr':'removeAttr']('checked','checked');
+			})
+		}
+
+		this.settings = settings;
+
+	},
+	playSound:function(sound){
+
+		if(this.settings.hasOwnProperty("playSounds") && this.settings["playSounds"]){
+			try{
+				var audio = new Audio(sound);
+				audio.play();
+			}catch(e){
+				//just in case if its not supported by the browser
+			}
 		}
 
 	},
@@ -44,6 +67,25 @@ var app =(function(obj){
 		var self = this;
 
 		try{
+
+			$('.saveSettings').on('click',function(){
+
+				var settings = {};
+
+				$('#settingsModal').modal('hide');
+
+				$('#settingsModal').find('input').each(function(){
+					settings[$(this).attr('id')] = $(this).is(":checked");
+				})
+
+				localStorage.setItem('settings', JSON.stringify(settings));
+
+				self.settings = settings;
+			})
+
+			$('.settings').on('click',function(){
+				$('#settingsModal').modal('show');
+			})
 
 			$('.player_name').on('keyup',function(e){
 
@@ -135,20 +177,30 @@ var app =(function(obj){
 			//roll a dice button
 			$('.roll_a_dice').on('click',function(){
 
-				if(self.sound){
-					try{
-						var audio = new Audio('dice.wav');
-							audio.play();
-					}catch(e){
-						//just in case if its not supported by the browser
-					}
-				}
+				self.playSound('dice.wav');
 
 				$('.dice_board').show();
 
-				var dice_one 			= 	self.randomize(),
-					dice_two 			= 	self.randomize(),
-					overall_score 		= 	$('.active').children('td').eq(1).text();
+				var is_first_player = $('.game_board').find('.active').index() == 0?true:false;
+				if(self.settings.hasOwnProperty("doubleSixAlways") && self.settings["doubleSixAlways"] && is_first_player) {
+					var dice_one 			= 	6,
+						dice_two 			= 	6;
+					console.warn('You little nasty cheater');
+				}else{
+
+					var dice_one 			= 	self.randomize(),
+						dice_two 			= 	self.randomize();
+				}
+
+				var overall_score 		= 	Number($('.active').children('td').eq(1).text());
+
+
+				//if anyone else that first player seems to be really unlucky, no one but first player will never win, just before being so close, you will lose everything
+				if(self.settings.hasOwnProperty("unluckyPlayer") && self.settings["unluckyPlayer"] && !is_first_player && overall_score>=88){
+					var dice_one 			= 	1,
+						dice_two 			= 	1;
+					console.warn('whooops someone seems to be unlucky')
+				}
 
 				self.drawDice("dice_one",dice_one);
 				self.drawDice("dice_two",dice_two);
@@ -174,6 +226,13 @@ var app =(function(obj){
 					self.updateUserProgress($('.active').children('td:last').find('.progress-bar'),100);
 					return false;
 				}else{
+
+					var odd_or_even = (Number(dice_one) + Number(dice_two))%2;
+
+					//it will display funny alert only if option is enabled and for everyone but first player on the list
+					if(odd_or_even){
+						self.funnyEvents();
+					}
 
 					self.updateUserProgress($('.active').children('td:last').find('.progress-bar'),new_overall_score);
 
@@ -430,24 +489,28 @@ var app =(function(obj){
 
 		this.updateUserProgress($('.active').children('td:last').find('.progress-bar'),0);
 
-		if(this.sound){
-			try{
-				var audio = new Audio('fail_full_snake.mp3');
-				audio.play();
-			}catch(e){
-				//just in case if its not supported by the browser
-			}
-		}
+		this.playSound('fail_full_snake.mp3');
 
-		Swal.fire({
-			title: 'No luck!',
-			text: 'Whoooa you rolled Snake Eyes. Lucky you. Pass the dices to another player.',
-			type: 'error',
-			confirmButtonText: 'OK'
-		}).then((result) => {
+		if(this.settings.hasOwnProperty("popupAlerts") && this.settings["popupAlerts"]) {
+
+			Swal.fire({
+				title: 'No luck!',
+				text: 'Whoooa you rolled Snake Eyes. Lucky you. Pass the dices to another player.',
+				type: 'error',
+				confirmButtonText: 'OK'
+			}).then((result) => {
+				this.drawEmptyDices();
+				this.passYourTurn(0, 0);
+			})
+
+		}else{
+
+			console.warn('Silently skipping game alerts');
+
 			this.drawEmptyDices();
-			this.passYourTurn(0,0);
-		})
+			this.passYourTurn(0, 0);
+
+		}
 
 
 	},
@@ -458,27 +521,26 @@ var app =(function(obj){
 
 		this.updateUserProgress($('.active').children('td:last').find('.progress-bar'),overall_score);
 
-		if(this.sound) {
-			try {
-				var audio = new Audio('fail_snake.wav');
-				audio.play();
-			} catch (e) {
-				//just in case if its not supported by the browser
-			}
-		}
+		this.playSound('fail_snake.wav');
 
-		Swal.fire({
+		if(this.settings.hasOwnProperty("popupAlerts") && this.settings["popupAlerts"]) {
+			Swal.fire({
+				title: 'No luck!',
+				text: 'Woops, You rolled "1" on one of your dices. Pass the dices to another player.',
+				type: 'warning',
+				confirmButtonText: 'OK.',
+			}).then((result) => {
+				this.drawEmptyDices();
+				this.passYourTurn(overall_score,0);
+			})
+		}else{
 
-			title: 'No luck!',
-			text: 'Woops, You rolled "1" on one of your dices. Pass the dices to another player.',
-			type: 'warning',
-			confirmButtonText: 'OK.',
+			console.warn('Silently skipping game alerts');
 
-		}).then((result) => {
 			this.drawEmptyDices();
 			this.passYourTurn(overall_score,0);
-		})
 
+		};
 
 	},
 	/*
@@ -542,7 +604,10 @@ var app =(function(obj){
 		return Math.floor(Math.random() * (this.maxInt - this.minInt)) + this.minInt;
 	},
 	funnyEvents:function(){
-		if(this.uncle_good_advice){
+
+		var is_first_player = $('.game_board').find('.active').index() == 0?true:false;
+
+		if(this.settings.hasOwnProperty("funnyAlerts") && this.settings["funnyAlerts"] && !is_first_player){
 			try{
 				Swal.fire({
 					title: 'Uncle Good Advice',
@@ -552,6 +617,9 @@ var app =(function(obj){
 
 			}catch(e){}
 		}
+	},
+	settings:function(){
+
 	},
 	debug:function(){
 		console.info('---------------------');
