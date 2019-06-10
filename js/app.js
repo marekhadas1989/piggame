@@ -23,13 +23,24 @@ var app =(function(obj){
 		"Never play leapfrog with a unicorn.",
 		"Learn from your parents' mistakes. Practice birth control.",
 		"Don't assume malice for what stupidity can explain.",
-		"The sooner you fall behind, the more time you'll have to catch up."
+		"The sooner you fall behind, the more time you'll have to catch up.",
+		"Health nuts are going to feel stupid someday, lying in the hospital dying of nothing.",
+		"Teach a child to be polite and courteous in the home and, when he grows up, he'll never be able to edge his car onto a freeway."
 	],
 	init:function(options){
 
+		//to be continued, this is just a placeholder for future hall of fame, this should be db driven ideally
+		var hof = [
+			{"name":'John Doe','score':7,'avatar':'./avatars/128x128/128_1.png'},
+			{"name":'Peter Doe','score':3,'avatar':'./avatars/128x128/128_2.png'},
+			{"name":'Jane Doe','score':1,'avatar':'./avatars/128x128/128_3.png'}
+		];
+		localStorage.setItem('hall_of_fame', JSON.stringify(hof));
+		//end hall of fame
+
 		console.warn("APP STARTED "+(new Date));
 
-		var autoload = ['events','restoreSettings'];
+		var autoload = ['events','restoreSettings','hallOfFame'];
 
 		for(var a in autoload){
 			this[autoload[a]]();
@@ -222,7 +233,7 @@ var app =(function(obj){
 				var new_overall_score 	= 	Number(overall_score) + new_current_score;
 
 				if(new_overall_score>=100){
-					self.youWon($('.active'));
+					self.youWin($('.active'));
 					self.updateUserProgress($('.active').children('td:last').find('.progress-bar'),100);
 					return false;
 				}else{
@@ -558,9 +569,9 @@ var app =(function(obj){
 		})
 	},
 	/*
-	You won allert
+	You win allert
 	 */
-	youWon:function(user_name){
+	youWin:function(user_name){
 
 		var progress = user_name.children('td:last');
 
@@ -574,7 +585,7 @@ var app =(function(obj){
 		}
 
 		Swal.fire({
-			title: 'You Won!',
+			title: 'You Win!',
 			text: 'Well done '+user_name.children('td').eq(0).text()+'. Do you want to play again?',
 			type: 'success',
 			confirmButtonText: 'OK',
@@ -618,8 +629,20 @@ var app =(function(obj){
 			}catch(e){}
 		}
 	},
-	settings:function(){
+	//this function will display 3 players who won most games
+	hallOfFame:function(){
+		var hof = localStorage.getItem('hall_of_fame')?JSON.parse(localStorage.getItem('hall_of_fame')):{};
 
+		if(Object.keys(hof).length > 0){
+
+			$(".hallOffameBox").html("");
+			for(var a in hof){
+				$(".hallOffameBox").append('<div class="col-md-12 text-left player_class"><img src="'+hof[a].avatar+'"><span>'+hof[a].name+'</span> <b>'+hof[a].score+'</b></div>');
+			}
+
+			$('.hall_of_fame').show();
+
+		}
 	},
 	debug:function(){
 		console.info('---------------------');
