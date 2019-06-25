@@ -9,6 +9,7 @@ var app =(function(obj){
 }({
 	settings:{},
 	websocket:false,
+	websocket_game_config:false,
 	minInt:1,
 	maxInt:6,
 	players:[],
@@ -683,14 +684,28 @@ var app =(function(obj){
 		var self = this;
 		this.websocket = new WebSocket('wss://merriemelodies.ddns.net:8008/piggame/');
 		this.websocket.onmessage = function(e) {
-			console.log(JSON.parse(e.data));
+			var message = JSON.parse(e.data);
+
+			if('broadcast' in message){
+				console.log(message);
+			}else{
+				console.log('OTHER SOCKET MESSAGE');
+			}
+
 			$('.debug_receive').append('<h6 style="color:green;font-weight:bold">'+e+'</h6>');
+
 		};
 
 
 		this.websocket.onopen = function(e) {
 
-			self.websocket.send(JSON.stringify({user_name:'assa',command:'WebSocket Init Message'}));
+			self.websocket.send(
+				JSON.stringify(
+				{
+					user_name:'assa',command:'WebSocket Init Message'
+					}
+				)
+			);
 		};
 
 		$('body').on('click','input[name="game_name"]',function(){
@@ -702,13 +717,28 @@ var app =(function(obj){
 		})
 
 		$('.host_game_final').on('click',function(){
-			alert('host game');
+			console.warn('host game');
+
+			self.websocket_game_config = {
+				'broadcast':true,
+				'game_name':$('.multiplayer_game_name').val(),
+				'player_name':$('.multiplayer_player_name').val(),
+				'player_avatar':$('.multiplayer').find('.player_avatar').attr('src'),
+			}
+
+			self.sendBroadcastMessage(self.websocket_game_config);
+
 		})
 
 		$('.join_game_final').on('click',function(){
 			alert('join game');
 		})
 
+	},
+	sendBroadcastMessage:function(msg){
+		this.websocket.send(
+			JSON.stringify(msg)
+		)
 	},
 	webSocketDebug:function(){
 
