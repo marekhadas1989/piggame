@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>Laravel</title>
+        <title>The Pig Game!</title>
 
         <!-- Fonts -->
         <link rel="stylesheet" href="./css/bootstrap.min.css">
@@ -120,8 +120,12 @@
 
                 <h1>
                     <button class="btn btn-success start_game" style="margin-top:20px">Start Game</button>
+                    <button class="btn btn-warning start_multiplayer" style="margin-top:20px;color:white">Multiplayer</button>
                 </h1>
 
+                <h6>
+                    &copy; copyright ... all right :-)
+                </h6>
             </div>
         </div>
 
@@ -199,15 +203,15 @@
             </div>
         </div>
 
-        <script src="./js/jquery-3.4.1.min.js"></script>
-        <script src="./js/popper.min.js"></script>
-        <script src="./js/bootstrap.min.js"></script>
+        <script src="{{ asset('js/jquery-3.4.1.min.js') }}"></script>
+        <script src="{{ asset('js/popper.min.js') }}"></script>
+        <script src="{{ asset('js/bootstrap.min.js') }}"></script>
 
         <!--Proper JS app -->
-        <script src="./js/app.js"></script>
+        <script src="{{ asset('js/app.js') }}"></script>
 
 
-        <script src="./js/sweetalert2.js"></script>
+        <script src="{{ asset('js/sweetalert2.js') }}"></script>
         <script type="text/javascript" src="{{ asset('js/datatables.min.js') }}"></script>
 
         <script type="text/javascript">

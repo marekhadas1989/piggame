@@ -79,6 +79,10 @@ var app =(function(obj){
 
 		try{
 
+			$('.start_multiplayer').on('click',function(){
+				alert('to be continued');
+			})
+			
 			$('.saveSettings').on('click',function(){
 
 				var settings = {};
@@ -501,7 +505,7 @@ var app =(function(obj){
 
 		this.updateUserProgress($('.active').children('td:last').find('.progress-bar'),0);
 
-		this.playSound('fail_full_snake.mp3');
+		this.playSound('/sound/fail_full_snake.mp3');
 
 		if(this.settings.hasOwnProperty("popupAlerts") && this.settings["popupAlerts"]) {
 
@@ -533,7 +537,7 @@ var app =(function(obj){
 
 		this.updateUserProgress($('.active').children('td:last').find('.progress-bar'),overall_score);
 
-		this.playSound('fail_snake.wav');
+		this.playSound('/sound/fail_snake.mp3');
 
 		if(this.settings.hasOwnProperty("popupAlerts") && this.settings["popupAlerts"]) {
 			Swal.fire({
@@ -576,14 +580,8 @@ var app =(function(obj){
 
 		var progress = user_name.children('td:last');
 
-		if(this.sound){
-			try{
-				var audio = new Audio('won.wav');
-				audio.play();
-			}catch(e){
-				//just in case if its not supported by the browser
-			}
-		}
+		this.playSound('/sound/win.mp3');
+
 
 		Swal.fire({
 			title: 'You Win!',
@@ -652,6 +650,9 @@ var app =(function(obj){
 		for(var a in this){
 			console.log(a);
 		}
+	},
+	multiplayer:function(){
+
 	}
 })
 );
