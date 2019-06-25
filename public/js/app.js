@@ -189,7 +189,7 @@ var app =(function(obj){
 			//roll a dice button
 			$('.roll_a_dice').on('click',function(){
 
-				self.playSound('dice.wav');
+				self.playSound('/sound/dice_roll.mp3');
 
 				$('.dice_board').show();
 
