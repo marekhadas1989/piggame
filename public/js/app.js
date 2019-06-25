@@ -1,13 +1,14 @@
 var app =(function(obj){
 
 	return {
-		start:function(){
-			obj.init();
+		start:function(options){
+			obj.init(options);
 		}
 	}
 
 }({
 	settings:{},
+	websocket:false,
 	minInt:1,
 	maxInt:6,
 	players:[],
@@ -29,6 +30,12 @@ var app =(function(obj){
 	],
 	init:function(options){
 
+		if('debug' in options && options['debug']){
+			$('.debug_box').show();
+			$('.debug_box').siblings('div').toggleClass('col-md-12 col-md-6');
+			this.webSocketDebug();
+		}
+
 		//to be continued, this is just a placeholder for future hall of fame, this should be db driven ideally
 		var hof = [
 			{"name":'John Doe','score':7,'avatar':'./avatars/128x128/128_1.png'},
@@ -40,7 +47,7 @@ var app =(function(obj){
 
 		console.warn("APP STARTED "+(new Date));
 
-		var autoload = ['events','restoreSettings','hallOfFame'];
+		var autoload = ['events','restoreSettings','hallOfFame','multiplayer'];
 
 		for(var a in autoload){
 			this[autoload[a]]();
@@ -80,9 +87,11 @@ var app =(function(obj){
 		try{
 
 			$('.start_multiplayer').on('click',function(){
-				alert('to be continued');
+				$('.game_box').hide();
+				$('.multiplayer').show();
+
 			})
-			
+
 			$('.saveSettings').on('click',function(){
 
 				var settings = {};
@@ -651,7 +660,69 @@ var app =(function(obj){
 			console.log(a);
 		}
 	},
+	canHostGame:function(){
+
+		if($('.multiplayer_game_name').val().length && $('.multiplayer_player_name').val().length){
+			$('.host_game_final').removeAttr('disabled');
+
+
+
+		}else{
+			$('.host_game_final').attr('disabled','disabled');
+		}
+
+		if($('.multiplayer_player_name').val().length && $('input[name="game_name"]').is(":checked")){
+			$('.join_game_final').removeAttr('disabled');
+		}else{
+			$('.join_game_final').attr('disabled','disabled');
+		}
+
+	},
 	multiplayer:function(){
+
+		var self = this;
+		this.websocket = new WebSocket('wss://merriemelodies.ddns.net:8008/piggame/');
+		this.websocket.onmessage = function(e) {
+			console.log(JSON.parse(e.data));
+			$('.debug_receive').append('<h6 style="color:green;font-weight:bold">'+e+'</h6>');
+		};
+
+
+		this.websocket.onopen = function(e) {
+
+			self.websocket.send(JSON.stringify({user_name:'assa',command:'WebSocket Init Message'}));
+		};
+
+		$('body').on('click','input[name="game_name"]',function(){
+			self.canHostGame();
+		})
+
+		$('.multiplayer_game_name,.multiplayer_player_name').on('keyup',function(){
+			self.canHostGame();
+		})
+
+		$('.host_game_final').on('click',function(){
+			alert('host game');
+		})
+
+		$('.join_game_final').on('click',function(){
+			alert('join game');
+		})
+
+	},
+	webSocketDebug:function(){
+
+		var self = this;
+
+		$('.debug_send').on('click',function(){
+
+			var debug_text = $('.debug_text').val();
+				$('.debug_text').val("");
+				$('.debug_receive').append('<h6 style="color:red;font-weight:bold">'+debug_text+'</h6>');
+
+			self.websocket.send(debug_text);
+
+		})
 
 	}
 })

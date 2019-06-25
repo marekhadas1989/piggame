@@ -102,7 +102,7 @@
             </div>
         </div>
 
-        <div class="row start initial_box game_box">
+        <div class="row start initial_box game_box" style="display:none">
             <div class="col-md-12 text-center" style="border-radius:5px;background:white;padding:40px;border:solid 1px #bcbaba">
 
                 <i class="fas fa-cog settings"></i>
@@ -123,10 +123,29 @@
                     <button class="btn btn-warning start_multiplayer" style="margin-top:20px;color:white">Multiplayer</button>
                 </h1>
 
+
                 <h6>
                     &copy; copyright ... all right :-)
                 </h6>
             </div>
+
+            <div class="col-md-6 debug_box" style="background:white;display:none">
+                Debug Box
+                <h1>
+                    <textarea type="text" class="form-control debug_text"></textarea>
+                </h1>
+                <button class="btn btn-success btn-sm debug_send" style="margin-top:20px">Send</button>
+                <br>  <br>
+                <h6>Received</h6>
+
+                <div class="row">
+                    <div class="col-md-12 debug_receive" style="max-height: 300px;overflow-y:scroll">
+
+                    </div>
+                </div>
+
+            </div>
+
         </div>
 
         <div class="row player_selection game_box" style="display:none">
@@ -159,6 +178,72 @@
                 </div>
 
             </div>
+        </div>
+
+        <div class="row multiplayer game_box" style="display:block">
+
+            <div class="col-md-12 text-center" style="border-radius:5px;background:white;padding:40px;border:solid 1px #bcbaba">
+
+                <h2 style="color:#563D7C">Your Player</h2>
+
+                <div class="col-md-12" style="cursor:pointer">
+                    <img src="./avatars/128x128/128_1.png" class="img-fluid player_avatar" data-toggle="modal" data-target="#user_avatar">
+
+                    <div class="input-group mb-3" style="margin-top:10px">
+                        <input type="text" class="form-control multiplayer_game_name">
+                        <div class="input-group-append">
+                            <span class="input-group-text">Enter Game Name</span>
+                        </div>
+
+                    </div>
+
+                    <div class="input-group mb-3" style="margin-top:10px">
+                        <input type="text" class="form-control multiplayer_player_name">
+                        <div class="input-group-append">
+                            <span class="input-group-text">Enter Player Name</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="row players_list" style="margin:20px 0px 20px 0px;max-height:300px;overflow-y:scroll">
+
+                </div>
+
+                <h2 style="color:#563D7C">Games Available</h2>
+                <div class="row remove_game_list" style="margin:20px 0px 20px 0px;max-height:300px;overflow-y:scroll">
+
+
+                    <div class="col-md-12 player_class">
+                        <label>
+                            <input type="radio" name="game_name" style="margin-top:10px;">
+                            <img src="./avatars/128x128/128_1.png" style="margin-right:5px">Marek's Game <b>(6 Players)</b>
+                        </label>
+                    </div>
+
+                    <div class="col-md-12 player_class">
+                        <label>
+                            <input type="radio" name="game_name" style="margin-top:10px;">
+                            <img src="./avatars/128x128/128_3.png" style="margin-right:5px">Marek's Game <b>(6 Players)</b>
+                        </label>
+                    </div>
+
+                    <div class="col-md-12 player_class">
+                        <label>
+                            <input type="radio" name="game_name" style="margin-top:10px;">
+                            <img src="./avatars/128x128/128_7.png" style="margin-right:5px">Marek's Game <b>(6 Players)</b>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="col-md-12">
+                    <button class="btn btn-info host_game_final" disabled="disabled" style="margin-top:20px">Host Game</button>
+                    <button class="btn btn-danger join_game_final" disabled="disabled" style="margin-top:20px">Join Game</button>
+                    <button class="btn btn-success go_back" style="margin-top:20px">Go Back</button>
+                </div>
+
+            </div>
+
         </div>
 
         <div class="row game_board game_box" style="display:none">
@@ -200,7 +285,9 @@
 
             <div class="col-md-12">
                 <button class="btn btn-danger float-right cancel_game" style="margin-top:20px;color:white">Cancel Game</button>
+
             </div>
+
         </div>
 
         <script src="{{ asset('js/jquery-3.4.1.min.js') }}"></script>
@@ -220,10 +307,11 @@
 
                 "use strict";
 
-                app.start();
+                app.start({debug:true});
 
             })
         </script>
+
 
     </body>
 </html>

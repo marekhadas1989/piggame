@@ -33,12 +33,14 @@ body {
 .player_class img,
 .player_list img{
   max-width:30px;
-  margin-bottom:5px
+  margin-bottom:5px;
+  cursor:pointer;
 }
 .player_class img,
 .player_list.player_class span{
   font-weight:bold;
-  color:#80bdff
+  color:#80bdff;
+  cursor:pointer;
 }
 
 .user_avatar_selection {
