@@ -13,12 +13,13 @@ var app =(function(obj){
 	}()),
 	settings:{},
 	gamesAvailable:{},
-	myGameName:false,
+	myGame:{},
 	websocket:false,
 	websocket_game_config:false,
-	minInt:1,
-	maxInt:6,
-	players:{},
+	minDiceInt:1,
+	maxDiceInt:6,
+	singlePlayerPlayers:[],
+	chatUsers:{},
 	funny:[
 		"If you can smile when things go wrong, you already have someone to blame",
 		"The older you are, the harder it is to lose weight, because your body and your fat have become good buddies.",
@@ -37,24 +38,29 @@ var app =(function(obj){
 	],
 	init:function(options){
 
-		console.log(this.clientID);
-
 		var self = this;
 
 		$(window).on('beforeunload', function(){
 			//if you are hosting any games prevent of closing down the browser straight ahead
-			if(self.myGameName){
+			if(Object.keys(self.myGame).length){
 				return false;
 			}
 		});
 
 		$(window).on('unload', function(){
+
+			//removeOldChat
+			self.sendBroadcastMessage({
+				'removeOldChat'			: 	true,
+				'clientID'				:	self.clientID
+			});
+
 			//if user decided to quit anyway, remove game for other users
-			if(self.myGameName){
+			if(Object.keys(self.myGame).length){
 				self.sendBroadcastMessage({
 					'gameRemovedForcefully'	: 	true,
 					'clientID'				:	self.clientID,
-					'deleteGameFromList'	:	self.myGameName.gameName
+					'deleteGameFromList'	:	self.myGame.gameName
 				});
 			}
 		});
@@ -74,7 +80,7 @@ var app =(function(obj){
 		localStorage.setItem('hall_of_fame', JSON.stringify(hof));
 		//end hall of fame
 
-		console.warn("APP STARTED "+(new Date));
+		console.warn("APP STARTED "+(new Date)+" "+this.clientID);
 
 		var autoload = ['events','restoreSettings','hallOfFame','websockets'];
 
@@ -119,10 +125,79 @@ var app =(function(obj){
 
 		try{
 
+			$('.user_chat_notification').on('click',function(){
+
+				$('.chat_box').show();
+				self.showUserChat();
+
+				var recipent = $(this).attr('chanel');
+
+
+
+				if(recipent == 'all'){
+					$('h5[recipent="all"]').click();
+				}else{
+
+					$('h6[recipent="'+recipent+'"]').click();
+				}
+
+				$(this).hide();
+
+			})
+
+			//chat user selection
+			$('body').on('click','.chatUsers h5,.chatUsers h6',function(){
+
+				$('.chatChanel').hide();
+				$('.chatChanel[chanel="'+$(this).attr('recipent')+'"]').show();
+
+				if(!$(this).hasClass('selectedChatUser')){
+					$('.chatUsers').children('h5,h6').removeClass("selectedChatUser");
+					$(this).addClass("selectedChatUser");
+				}
+
+				self.canSendMessage();
+
+			})
+
+			$('.chatSubmit').on('click',function(){
+
+				var msg 		= $('.chatText').val(),
+					user_name 	= $('.multiplayer_player_name').val() || self.clientID,
+					user_img 	= $('.player_avatar').attr('src'),
+					user_data	= {
+						'userName'		:	user_name,
+						'userAvatar'	:	user_img
+					};
+
+				self.sendBroadcastMessage({
+					'chatMessage'	:	true,
+					"messageValue"	:	msg,
+					'clientID'		:	self.clientID,
+					'recipent'		:	$('.selectedChatUser').attr('recipent'),
+					'userData'		:	user_data
+				});
+
+				self.addMessageToChat(msg,$('.selectedChatUser').attr('recipent'),user_data);
+
+				$('.chatText').val("");
+
+				self.canSendMessage();
+
+			})
+
+			$('.chatText').on('keyup',function(){
+				self.canSendMessage();
+			})
+
+			$('.user_chat_display').on('click',function(){
+				$('.chat_box').toggle();
+				self.showUserChat();
+			})
+
 			$('.start_multiplayer').on('click',function(){
 				$('.game_box').hide();
 				$('.multiplayer').show();
-
 			})
 
 			$('.saveSettings').on('click',function(){
@@ -186,7 +261,6 @@ var app =(function(obj){
 					);
 
 					first_player = false;
-
 				})
 
 				$('.game_board').show();
@@ -202,24 +276,26 @@ var app =(function(obj){
 			//add new player on players list
 			$('.add_player').on('click',function(){
 
-				var p_image = $('.player_avatar').attr('src'),
-					p_name 	= $.trim($('.player_name').val());
+				var playerAvatar 	= 	$('.player_avatar').attr('src'),
+					playerName 		= 	$.trim($('.player_name').val());
 
 				//if user does not exists
-				if(self.players.indexOf(p_name)==-1){
+				if(self.singlePlayerPlayers.indexOf(playerAvatar)==-1){
 
-					self.players.push(p_name);
+					self.singlePlayerPlayers.push(playerAvatar);
 
 					$('.player_selection').find('.players_list').append(
-						'<div class="col-md-12 text-left player_list">' +
-						'<img src="'+p_image+'">' +
-						'<span class="align-middle"> '+p_name+'</span>' +
-						'<span class="remove_player float-right" aria-hidden="true">×</span>'+
-						'</div>'
+						self.playerMockup(
+							playerAvatar,
+							playerName,
+							self.clientID,
+							true
+						)
 					);
 
 					self.resetPlayer();
 					self.checkIfGameIsReady();
+
 				}else{
 					Swal.fire({
 						title: 'Error!',
@@ -304,7 +380,7 @@ var app =(function(obj){
 				$('.player_name').val("");
 				$('.game_box').hide();
 				$('.start').fadeIn();
-				self.players = [];
+				self.singlePlayerPlayers = [];
 			})
 
 			$('.pass_turn').on('click',function(){
@@ -323,9 +399,9 @@ var app =(function(obj){
 				var user_name = $.trim($(this).parent().find('span').eq(0).text());
 
 				//remove user from users array
-				for( var i = 0; i < self.players.length; i++){
-					if ( self.players[i] == user_name) {
-						self.players.splice(i, 1);
+				for( var i = 0; i < self.singlePlayerPlayers.length; i++){
+					if ( self.singlePlayerPlayers[i] == user_name) {
+						self.singlePlayerPlayers.splice(i, 1);
 					}
 				}
 
@@ -341,6 +417,42 @@ var app =(function(obj){
 		}catch(e){
 			//future usage, to be continued
 		}
+	},
+	//create new channel if does not exits already
+	createNewChatChanel:function(chanel){
+
+		if($('.chatChanel[chanel="'+chanel+'"]').length == 0){
+			var newChanel = "<div class='col-md-12 chatChanel' chanel='"+chanel+"'>";
+			$(newChanel).insertAfter($('.chatChanel[chanel="all"]'));
+			$('.chatChanel[chanel="'+chanel+'"]').hide();
+		}
+
+	},
+	addMessageToChat:function(message,recipent,userData){
+
+
+		var msg =
+			"<div class='row' margin-top:5px>"+
+				this.playerMockup(userData.userAvatar,userData.userName,this.clientID,false)+
+				"<div class='col-md-12'>"+message+"</div>"+
+			"</div>";
+
+		$('.chatChanel[chanel="'+recipent+'"]').append(msg);
+
+	},
+	playerMockup:function(playerAvatar,playerName,clientID,owner = true){
+
+		var canDelete = owner?'<span class="remove_player float-right" aria-hidden="true">×</span>':"";
+
+		var mock =
+		'<div class="col-md-12 text-left player_list" clientID="'+clientID+'">' +
+			'<img src="'+playerAvatar+'">' +
+			'<span class="align-middle"> '+playerName+'</span>'
+			+canDelete+
+		'</div>';
+
+		return mock;
+
 	},
 	updateUserProgress:function(progress_bar,score){
 
@@ -647,13 +759,13 @@ var app =(function(obj){
 		$(".game_box").hide();
 		$('.initial_box').show();
 		$('#users_list tbody').html("");
-		this.players = [];
+		this.singlePlayerPlayers = [];
 	},
 	/*
 	Generate random number 1-6
 	*/
 	randomize:function(){
-		return Math.floor(Math.random() * (this.maxInt - this.minInt)) + this.minInt;
+		return Math.floor(Math.random() * (this.maxDiceInt - this.minDiceInt)) + this.minDiceInt;
 	},
 	funnyEvents:function(){
 
@@ -716,13 +828,16 @@ var app =(function(obj){
 				if(message.hasOwnProperty('openGameSearch')){
 					//if i am hosting anything, respond back to the client
 
-					if(self.myGameName){
+					//add new user to chat list
+					self.addNewChatUser(message.chatUserName,message.clientID);
+
+					if(Object.keys(self.myGame).length){
 						self.sendBroadcastMessage({
 							'clientID'		:	self.clientID,
-							'gameName'		:	self.myGameName.gameName,
-							'userName'		:	self.myGameName.userName,
-							'gameAvatar'	:	self.myGameName.gameAvatar,
-							'players'		:	1,
+							'gameName'		:	self.myGame.gameName,
+							'userName'		:	self.myGame.userName,
+							'gameAvatar'	:	self.myGame.gameAvatar,
+							'playersCount'	:	1,
 
 						});
 					}
@@ -746,25 +861,58 @@ var app =(function(obj){
 						self.addAwaitingGames();
 					}
 
+				//Join Game Init function if new player is about to join the game
 				}else if(message.hasOwnProperty('joinGame')){
 
-alert('join');
-console.log(self.myGameName.gameName);
-console.log(message.joinGame);
-
 					//join existing game
-					if(self.myGameName.gameName == message.joinGame){
+					if(self.myGame.gameName == message.joinGame){
 
-						if(!(message.playerName == self.myGameName.players)){
-							alert('Player already exists');
+						if(!(message.playerName in self.myGame.playersList)){
+
+							self.myGame.playersList[message.playerName] = {
+								'playerID'		:	message.clientID,
+								'owner'			:	false,
+								'userName'		:	message.playerName,
+								'userAvatar'	:	message.playerAvatar,
+							}
+							//increment number of players
+							self.myGame.playersCount++;
+
+							//send message to the client so to inform the game is ready
+							self.sendBroadcastMessage({
+								'clientID'			:	self.clientID,
+								'playersCount'		:	self.myGame.playersCount,
+								'playerJoinedGame'	:	true,
+								'playerList'		:	self.myGame.playersList
+							})
+
+							self.showRemoteGamePlayers(self.myGame.playersList,true);
+
 						}else{
-							alert('player joined');
+							alert('Player already exists, choose a different name for you player');
 						}
 
 					}
 
-					//{"joinGame":gameName,"playerName":playerName,"playerAvatar":playerAvatar}
+				//if player joined the game successfully
+				}else if(message.hasOwnProperty('playerJoinedGame')){
+					self.showRemoteGamePlayers(message.playerList,false);
+				}else if(message.hasOwnProperty('chatMessage')){
 
+
+					if(message.recipent == 'all' || message.recipent == self.clientID){
+
+						console.log(message.recipent=='all'?'all':self.clientID);
+						console.log(message.recipent=='all'?'all':message.clientID);
+
+						self.notifyUserNewMessage(message.recipent=='all'?'all':message.clientID);
+						self.addMessageToChat(message.messageValue,message.recipent=='all'?'all':message.clientID,message.userData);
+
+					};
+
+				}else if(message.hasOwnProperty('removeOldChat')){
+					$('h6[recipent="'+message.clientID+'"]').remove();
+					$('.chatChanel[recipent="'+message.clientID+'"]').remove();
 				};
 
 				$('.debug_receive').append('<h6 style="color:green;font-weight:bold">'+e+'</h6>');
@@ -775,7 +923,9 @@ console.log(message.joinGame);
 				function(){
 					self.sendBroadcastMessage({
 						'clientID'			:	self.clientID,
-						'openGameSearch'	:	true
+						'openGameSearch'	:	true,
+						'newUserSearch'		: 	true,
+						'chatUserName'		:	$('.multiplayer_player_name').val()
 					})
 				}
 				,1000
@@ -800,14 +950,14 @@ console.log(message.joinGame);
 			$(".remotePlayersTitle,.players_list_remote").hide();
 			$(".remoteGamesTitle,.remoteGameList").show();
 
-			if(self.myGameName!==false) {
+			if(Object.keys(self.myGame).length) {
 
 				self.sendBroadcastMessage({
 					'clientID'				:	self.clientID,
-					'deleteGameFromList'	: 	self.myGameName.gameName
+					'deleteGameFromList'	: 	self.myGame.gameName
 				});
 
-				self.myGameName = {};
+				self.myGame = {};
 
 			}
 
@@ -819,31 +969,37 @@ console.log(message.joinGame);
 			var newNameGame = $('.multiplayer_game_name').val();
 
 			//removing old game
-			if(self.myGameName!==false){
+			if(Object.keys(self.myGame).length){
 
 				self.sendBroadcastMessage({
 					'clientID'			:	self.clientID,
-					'deleteGameFromList':	self.myGameName.gameName
+					'deleteGameFromList':	self.myGame.gameName
 				});
 
 			}
 
 			//creating new game
 			if(!(newNameGame in self.gamesAvailable)){
+
 				//add config of your game, which will be captured by interval
-				self.myGameName = {
+
+				var playersList = {};
+					playersList[$('.multiplayer_player_name').val()] = {
+						'playerID'		:	self.clientID,
+						'owner'			:	true,
+						'userName'		:	$('.multiplayer_player_name').val(),
+						'userAvatar'	:	$('.multiplayer').find('.player_avatar').attr('src'),
+					};
+
+				self.myGame = {
 					'gameName'		:	newNameGame,
 					'userName'		:	$('.multiplayer_player_name').val(),
 					'gameAvatar'	:	$('.multiplayer').find('.player_avatar').attr('src'),
-					'players'		:	1
+					'playersCount'	:	1,
+					'playersList'	:	playersList
 				}
 
-				$('.multiplayer_game_name,.multiplayer_player_name').attr("disabled","disabled");
-				$(".remoteGameControllsStart").show();
-				$(".remoteGameControlls").hide();
-
-				$(".remotePlayersTitle,.players_list_remote").show();
-				$(".remoteGamesTitle,.remoteGameList").hide();
+				self.showRemoteGamePlayers(playersList,true);
 
 			}else{
 				Swal.fire({
@@ -855,7 +1011,6 @@ console.log(message.joinGame);
 				return false;
 				//game already exists or was created by someone else and it's still active
 			}
-
 
 		})
 
@@ -877,8 +1032,71 @@ console.log(message.joinGame);
 		})
 
 	},
+	addNewChatUser(userName,clientID){
+
+		if(!(clientID in this.chatUsers) && clientID != this.clientID) {
+
+			//add new user to chat list
+			this.chatUsers[clientID] = userName;
+			$('.chatUsers').append('<h6 recipent="' + clientID + '" style="cursor:pointer;color:#17a2b8">' + (userName || clientID) + '</h6>');
+
+			this.createNewChatChanel(clientID);
+		}else{
+			if(this.chatUsers[clientID]!=userName && this.chatUsers[clientID]!=clientID){
+				this.chatUsers[clientID] = userName;
+				$('h6[recipent="'+clientID+'"]').text(userName || clientID);
+			}
+		}
+
+	},
+	notifyUserNewMessage:function(chanel){
+
+		//if chat is invisible notify or if chat is visible but not for the channel message was received from
+		if(!($('.chat_box').is(":visible")) || !($('.chatChanel[chanel="'+chanel+'"]').is(":visible"))){
+			$('.user_chat_notification').show().attr('chanel',chanel);
+
+			this.playSound('/sound/message.mp3');
+		}
+
+	},
+	showRemoteGamePlayers:function(playersList,owner){
+
+		$('.multiplayer_game_name,.multiplayer_player_name').attr("disabled","disabled");
+		$(".remoteGameControllsStart").show();
+		$(".remoteGameControlls").hide();
+
+		$(".remotePlayersTitle,.players_list_remote").show();
+		$(".remoteGamesTitle,.remoteGameList").hide();
+
+		for(var player in playersList){
+
+			if(playersList[player].playerID != this.clientID){
+				$('.players_list_remote').append(
+					this.playerMockup(
+						playersList[player].userAvatar,
+						playersList[player].userName,
+						this.clientID,
+						owner
+					)
+				);
+			}
+		}
+
+		$('#awaitingForPlayers').hide();
+	},
 	addAwaitingGames:function(){
 		$('.remoteGameList').append('<div id="awaitingForGames" class="col-md-12 align-center">Awaiting for games available...</div>');
+	},
+	remoteGameMockup:function(gameName,gameAvatar,playersCount){
+
+		var game_html =
+			'<div class="col-md-12 player_class" game_name="'+gameName+'">' +
+			'	<label>' +
+			'		<input type="radio" name="game_name" gameName="'+gameName+'" style="margin-top:10px;">' +
+			'		<img src="'+gameAvatar+'" style="margin-right:5px">'+gameName+' <b>'+playersCount+' Player(s)</b>' +
+			'	</label>' +
+			'</div>';
+		return game_html;
 	},
 	handleNewRemoteGame(game){
 
@@ -889,15 +1107,7 @@ console.log(message.joinGame);
 
 			this.gamesAvailable[game.gameName] = game.gameName;
 
-			console.log(game);
-			var game_html =
-				'<div class="col-md-12 player_class" game_name="'+game.gameName+'">' +
-				'	<label>' +
-				'		<input type="radio" name="game_name" gameName="'+game.gameName+'" style="margin-top:10px;">' +
-				'		<img src="'+game.gameAvatar+'" style="margin-right:5px">'+game.gameName+' <b>'+game.players+' Player(s)</b>' +
-				'	</label>' +
-				'</div>';
-			$('.remoteGameList').append(game_html);
+			$('.remoteGameList').append(this.remoteGameMockup(game.gameName,game.gameAvatar,game.playersCount));
 
 		}
 
@@ -907,6 +1117,26 @@ console.log(message.joinGame);
 		this.websocket.send(
 			JSON.stringify(msg)
 		)
+
+	},
+	canSendMessage:function(){
+
+		if($('.chatUsers').find('.selectedChatUser').length > 0 && $('.chatText').val().length>0){
+			$('.chatSubmit').removeAttr('disabled');
+		}else{
+			$('.chatSubmit').attr('disabled','disabled');
+		}
+	},
+	showUserChat:function(){
+
+
+		if($('.chat_box').is(":visible")){
+			$('.multiplayer').children('div').eq(0).removeClass("col-md-12").addClass("col-md-6");
+			$('.multiplayer').css('max-width','1200px');
+		}else{
+			$('.multiplayer').children('div').eq(0).removeClass("col-md-6").addClass("col-md-12");
+			$('.multiplayer').css('max-width','730px');
+		}
 
 	},
 	webSocketDebug:function(){

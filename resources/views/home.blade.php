@@ -180,9 +180,15 @@
             </div>
         </div>
 
-        <div class="row multiplayer game_box" style="display:block">
+        <div class="row multiplayer game_box">
 
             <div class="col-md-12 text-center" style="border-radius:5px;background:white;padding:40px;border:solid 1px #bcbaba">
+
+                <div class="user_chat">
+                    <img class="user_chat_display" style="width:31px;height:31px;" src="./img/chat.png" class="img-fluid">
+                    <img class="user_chat_notification" style="display:none;width:50px;height:50px;" src="./img/bell.gif" class="img-fluid">
+
+                </div>
 
                 <h2 style="color:#563D7C">Your Player</h2>
 
@@ -238,6 +244,29 @@
 
             </div>
 
+            <div class="chat_box col-md-6" style="display:none;padding:40px;border-radius: 5px;background: white;border: solid 1px #bcbaba;">
+
+                <div class="row">
+
+                    <div class="col-md-4 chatUsers" style="width:100%;height:420px;overflow:auto">
+                        <h5 class="all selectedChatUser" recipent="all" style="cursor:pointer;color:#dc3545">All</h5>
+                    </div>
+
+                    <div class="col-md-8">
+                        <div class="row">
+                            <div class="col-md-12 chatChanel" chanel="all"></div>
+
+                            <div class="input-group" >
+                                <input type="text" class="chatText form-control" >
+                                <div class="input-group-append">
+                                    <button disabled="disabled" class="chatSubmit btn btn-outline-secondary" type="button">Send</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
         </div>
 
         <div class="row game_board game_box" style="display:none">
@@ -283,6 +312,8 @@
             </div>
 
         </div>
+
+
 
         <script src="{{ asset('js/jquery-3.4.1.min.js') }}?v=<?php echo time();?>"></script>
         <script src="{{ asset('js/popper.min.js') }}?v=<?php echo time();?>"></script>
