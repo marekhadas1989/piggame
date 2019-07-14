@@ -1,18 +1,24 @@
 var app =(function(obj){
-
 	return {
 		start:function(options){
 			obj.init(options);
 		}
 	}
-
 }({
+	clientID:(function(){
+		return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+			var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+			return v.toString(16);
+		});
+	}()),
 	settings:{},
+	gamesAvailable:{},
+	myGameName:false,
 	websocket:false,
 	websocket_game_config:false,
 	minInt:1,
 	maxInt:6,
-	players:[],
+	players:{},
 	funny:[
 		"If you can smile when things go wrong, you already have someone to blame",
 		"The older you are, the harder it is to lose weight, because your body and your fat have become good buddies.",
@@ -31,6 +37,28 @@ var app =(function(obj){
 	],
 	init:function(options){
 
+		console.log(this.clientID);
+
+		var self = this;
+
+		$(window).on('beforeunload', function(){
+			//if you are hosting any games prevent of closing down the browser straight ahead
+			if(self.myGameName){
+				return false;
+			}
+		});
+
+		$(window).on('unload', function(){
+			//if user decided to quit anyway, remove game for other users
+			if(self.myGameName){
+				self.sendBroadcastMessage({
+					'gameRemovedForcefully'	: 	true,
+					'clientID'				:	self.clientID,
+					'deleteGameFromList'	:	self.myGameName.gameName
+				});
+			}
+		});
+
 		if('debug' in options && options['debug']){
 			$('.debug_box').show();
 			$('.debug_box').siblings('div').toggleClass('col-md-12 col-md-6');
@@ -48,10 +76,14 @@ var app =(function(obj){
 
 		console.warn("APP STARTED "+(new Date));
 
-		var autoload = ['events','restoreSettings','hallOfFame','multiplayer'];
+		var autoload = ['events','restoreSettings','hallOfFame','websockets'];
 
-		for(var a in autoload){
-			this[autoload[a]]();
+		try {
+			for (var a in autoload) {
+				this[autoload[a]]();
+			}
+		}catch(e){
+			console.warn('Autoload Error');
 		}
 
 	},
@@ -220,8 +252,8 @@ var app =(function(obj){
 
 				var overall_score 		= 	Number($('.active').children('td').eq(1).text());
 
-
-				//if anyone else that first player seems to be really unlucky, no one but first player will never win, just before being so close, you will lose everything
+				//so close yet so far away scenario
+				//all but first player seems to be really unlucky, no one but first player will never win, just before being so close, you will lose everything
 				if(self.settings.hasOwnProperty("unluckyPlayer") && self.settings["unluckyPlayer"] && !is_first_player && overall_score>=88){
 					var dice_one 			= 	1,
 						dice_two 			= 	1;
@@ -347,7 +379,7 @@ var app =(function(obj){
 
 	},
 	/*
-	Generate user for list using html template and return template so to add it later one wherever you want
+	Generate user for list using html template and return template so to add it later on wherever you want
 	 */
 	getProgressClass:function(user_progress){
 
@@ -484,11 +516,11 @@ var app =(function(obj){
 			}
 
 		}catch(e){
-			//this is fine, we are generating empty dices
+			//this is fine, empty dices are allowed at this stage
 		}
 	},
 	/*
-	Check if at least two players are added to the game and unlock start button if so, otherwise disabled start button
+	Check if at least two players are added to the game and unlock start button if so, otherwise disable start button
 	 */
 	checkIfGameIsReady:function(){
 		if($('.players_list').children('div').length>=2){
@@ -541,7 +573,7 @@ var app =(function(obj){
 
 	},
 	/*
-	Alert if someone rolled "1" on any of the dices
+	Alert if someone rolled out "1" on any of the dices
 	 */
 	snakeEyeHalf:function(overall_score){
 
@@ -661,16 +693,7 @@ var app =(function(obj){
 			console.log(a);
 		}
 	},
-	canHostGame:function(){
-
-		if($('.multiplayer_game_name').val().length && $('.multiplayer_player_name').val().length){
-			$('.host_game_final').removeAttr('disabled');
-
-
-
-		}else{
-			$('.host_game_final').attr('disabled','disabled');
-		}
+	canJoinGame:function(){
 
 		if($('.multiplayer_player_name').val().length && $('input[name="game_name"]').is(":checked")){
 			$('.join_game_final').removeAttr('disabled');
@@ -679,66 +702,212 @@ var app =(function(obj){
 		}
 
 	},
-	multiplayer:function(){
+	canHostGame:function(){
+		$('.host_game_final')[$('.multiplayer_game_name').val().length && $('.multiplayer_player_name').val().length?'removeAttr':'attr']('disabled','disabled');
+	},
+	websockets:function(){
 
 		var self = this;
-		this.websocket = new WebSocket('wss://merriemelodies.ddns.net:8008/piggame/');
-		this.websocket.onmessage = function(e) {
-			var message = JSON.parse(e.data);
 
-			if('broadcast' in message){
-				console.log(message);
-			}else{
-				console.log('OTHER SOCKET MESSAGE');
-			}
+			this.websocket = new WebSocket('wss://merriemelodies.ddns.net:8008/piggame/');
+			this.websocket.onmessage = function(e) {
+				var message = JSON.parse(e.data);
 
-			$('.debug_receive').append('<h6 style="color:green;font-weight:bold">'+e+'</h6>');
+				if(message.hasOwnProperty('openGameSearch')){
+					//if i am hosting anything, respond back to the client
 
-		};
+					if(self.myGameName){
+						self.sendBroadcastMessage({
+							'clientID'		:	self.clientID,
+							'gameName'		:	self.myGameName.gameName,
+							'userName'		:	self.myGameName.userName,
+							'gameAvatar'	:	self.myGameName.gameAvatar,
+							'players'		:	1,
 
-
-		this.websocket.onopen = function(e) {
-
-			self.websocket.send(
-				JSON.stringify(
-				{
-					user_name:'assa',command:'WebSocket Init Message'
+						});
 					}
-				)
+
+				}else if(message.hasOwnProperty('gameName')){
+
+					//add new game to the list
+					self.handleNewRemoteGame(message);
+
+				}else if(message.hasOwnProperty('deleteGameFromList')){
+
+					//inform users whether game has been terminated only when game is started and there are players
+					if(message.hasOwnProperty('gameRemovedForcefully')){
+						alert('Game has been terminated by the owner');
+					}
+
+					//delete game from list
+					$('.player_class[game_name="'+message.deleteGameFromList+'"]').remove();
+
+					if($('.remoteGameList').children().length<=0){
+						self.addAwaitingGames();
+					}
+
+				}else if(message.hasOwnProperty('joinGame')){
+
+alert('join');
+console.log(self.myGameName.gameName);
+console.log(message.joinGame);
+
+					//join existing game
+					if(self.myGameName.gameName == message.joinGame){
+
+						if(!(message.playerName == self.myGameName.players)){
+							alert('Player already exists');
+						}else{
+							alert('player joined');
+						}
+
+					}
+
+					//{"joinGame":gameName,"playerName":playerName,"playerAvatar":playerAvatar}
+
+				};
+
+				$('.debug_receive').append('<h6 style="color:green;font-weight:bold">'+e+'</h6>');
+
+			};
+
+			setInterval(
+				function(){
+					self.sendBroadcastMessage({
+						'clientID'			:	self.clientID,
+						'openGameSearch'	:	true
+					})
+				}
+				,1000
 			);
-		};
 
 		$('body').on('click','input[name="game_name"]',function(){
-			self.canHostGame();
+			self.canJoinGame();
 		})
 
 		$('.multiplayer_game_name,.multiplayer_player_name').on('keyup',function(){
 			self.canHostGame();
+			self.canJoinGame();
+		})
+
+		$('.go_back_host').on('click',function(){
+
+			$(".remoteGameControllsStart").hide();
+			$(".remoteGameControlls").show();
+
+			$('.multiplayer_game_name,.multiplayer_player_name').removeAttr("disabled").val("");
+
+			$(".remotePlayersTitle,.players_list_remote").hide();
+			$(".remoteGamesTitle,.remoteGameList").show();
+
+			if(self.myGameName!==false) {
+
+				self.sendBroadcastMessage({
+					'clientID'				:	self.clientID,
+					'deleteGameFromList'	: 	self.myGameName.gameName
+				});
+
+				self.myGameName = {};
+
+			}
+
 		})
 
 		$('.host_game_final').on('click',function(){
 			console.warn('host game');
 
-			self.websocket_game_config = {
-				'broadcast':true,
-				'game_name':$('.multiplayer_game_name').val(),
-				'player_name':$('.multiplayer_player_name').val(),
-				'player_avatar':$('.multiplayer').find('.player_avatar').attr('src'),
+			var newNameGame = $('.multiplayer_game_name').val();
+
+			//removing old game
+			if(self.myGameName!==false){
+
+				self.sendBroadcastMessage({
+					'clientID'			:	self.clientID,
+					'deleteGameFromList':	self.myGameName.gameName
+				});
+
 			}
 
-			self.sendBroadcastMessage(self.websocket_game_config);
+			//creating new game
+			if(!(newNameGame in self.gamesAvailable)){
+				//add config of your game, which will be captured by interval
+				self.myGameName = {
+					'gameName'		:	newNameGame,
+					'userName'		:	$('.multiplayer_player_name').val(),
+					'gameAvatar'	:	$('.multiplayer').find('.player_avatar').attr('src'),
+					'players'		:	1
+				}
+
+				$('.multiplayer_game_name,.multiplayer_player_name').attr("disabled","disabled");
+				$(".remoteGameControllsStart").show();
+				$(".remoteGameControlls").hide();
+
+				$(".remotePlayersTitle,.players_list_remote").show();
+				$(".remoteGamesTitle,.remoteGameList").hide();
+
+			}else{
+				Swal.fire({
+					title: 'Error!',
+					text: 'This game already exists, please try to user different game name.',
+					type: 'error',
+					confirmButtonText: 'OK'
+				})
+				return false;
+				//game already exists or was created by someone else and it's still active
+			}
+
 
 		})
 
 		$('.join_game_final').on('click',function(){
-			alert('join game');
+
+			var selectedGame 	= $('input[name="game_name"]').filter(":checked");
+
+			var gameName 		= selectedGame.attr('gameName'),
+				playerName 		= $('.multiplayer_player_name').val(),
+				playerAvatar 	= selectedGame.siblings('img').attr('src');
+
+			self.sendBroadcastMessage({
+				'clientID'		:	self.clientID,
+				"joinGame"		:	gameName,
+				"playerName"	:	playerName,
+				"playerAvatar"	:	playerAvatar
+			});
+
 		})
 
 	},
+	addAwaitingGames:function(){
+		$('.remoteGameList').append('<div id="awaitingForGames" class="col-md-12 align-center">Awaiting for games available...</div>');
+	},
+	handleNewRemoteGame(game){
+
+		//remove awaiting for games available
+		$('#awaitingForGames').remove();
+
+		if(!(game.gameName in this.gamesAvailable) || $('.player_class[game_name="'+game.gameName+'"]').length==0){
+
+			this.gamesAvailable[game.gameName] = game.gameName;
+
+			console.log(game);
+			var game_html =
+				'<div class="col-md-12 player_class" game_name="'+game.gameName+'">' +
+				'	<label>' +
+				'		<input type="radio" name="game_name" gameName="'+game.gameName+'" style="margin-top:10px;">' +
+				'		<img src="'+game.gameAvatar+'" style="margin-right:5px">'+game.gameName+' <b>'+game.players+' Player(s)</b>' +
+				'	</label>' +
+				'</div>';
+			$('.remoteGameList').append(game_html);
+
+		}
+
+	},
 	sendBroadcastMessage:function(msg){
+
 		this.websocket.send(
 			JSON.stringify(msg)
 		)
+
 	},
 	webSocketDebug:function(){
 

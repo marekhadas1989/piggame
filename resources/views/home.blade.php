@@ -206,37 +206,31 @@
 
                 </div>
 
-                <div class="row players_list" style="margin:20px 0px 20px 0px;max-height:300px;overflow-y:scroll">
-
-                </div>
-
-                <h2 style="color:#563D7C">Games Available</h2>
-                <div class="row remove_game_list" style="margin:20px 0px 20px 0px;max-height:300px;overflow-y:scroll">
-
-
-                    <div class="col-md-12 player_class">
-                        <label>
-                            <input type="radio" name="game_name" style="margin-top:10px;">
-                            <img src="./avatars/128x128/128_1.png" style="margin-right:5px">Marek's Game <b>(6 Players)</b>
-                        </label>
-                    </div>
-
-                    <div class="col-md-12 player_class">
-                        <label>
-                            <input type="radio" name="game_name" style="margin-top:10px;">
-                            <img src="./avatars/128x128/128_3.png" style="margin-right:5px">Marek's Game <b>(6 Players)</b>
-                        </label>
-                    </div>
-
-                    <div class="col-md-12 player_class">
-                        <label>
-                            <input type="radio" name="game_name" style="margin-top:10px;">
-                            <img src="./avatars/128x128/128_7.png" style="margin-right:5px">Marek's Game <b>(6 Players)</b>
-                        </label>
+                <h2 style="color:#563D7C;display:none" class="remotePlayersTitle">Game Players</h2>
+                <div class="row players_list_remote" style="margin:20px 0px 20px 0px;max-height:300px;overflow-y:scroll;display:none">
+                    <div id="awaitingForPlayers" class="col-md-12 align-center">
+                        Awaiting for players...
                     </div>
                 </div>
 
-                <div class="col-md-12">
+                <h2 style="color:#563D7C" class="remoteGamesTitle">Games Available</h2>
+                <div class="row remoteGameList" style="margin:20px 0px 20px 0px;max-height:300px;overflow-y:scroll">
+
+
+                    <div id="awaitingForGames" class="col-md-12 align-center">
+                        Awaiting for games available...
+                    </div>
+
+
+                </div>
+
+
+                <div class="col-md-12 remoteGameControllsStart" style="display:none">
+                    <button class="btn btn-info start_host_game_final" disabled="disabled" style="margin-top:20px">Start Game</button>
+                    <button class="btn btn-success go_back_host" style="margin-top:20px">Cancel</button>
+                </div>
+
+                <div class="col-md-12 remoteGameControlls">
                     <button class="btn btn-info host_game_final" disabled="disabled" style="margin-top:20px">Host Game</button>
                     <button class="btn btn-danger join_game_final" disabled="disabled" style="margin-top:20px">Join Game</button>
                     <button class="btn btn-success go_back" style="margin-top:20px">Go Back</button>
@@ -290,16 +284,16 @@
 
         </div>
 
-        <script src="{{ asset('js/jquery-3.4.1.min.js') }}"></script>
-        <script src="{{ asset('js/popper.min.js') }}"></script>
-        <script src="{{ asset('js/bootstrap.min.js') }}"></script>
+        <script src="{{ asset('js/jquery-3.4.1.min.js') }}?v=<?php echo time();?>"></script>
+        <script src="{{ asset('js/popper.min.js') }}?v=<?php echo time();?>"></script>
+        <script src="{{ asset('js/bootstrap.min.js') }}?v=<?php echo time();?>"></script>
 
         <!--Proper JS app -->
-        <script src="{{ asset('js/app.js') }}"></script>
+        <script src="{{ asset('js/app.js') }}?v=<?php echo time();?>"></script>
 
 
-        <script src="{{ asset('js/sweetalert2.js') }}"></script>
-        <script type="text/javascript" src="{{ asset('js/datatables.min.js') }}"></script>
+        <script src="{{ asset('js/sweetalert2.js') }}?v=<?php echo time();?>"></script>
+        <script type="text/javascript" src="{{ asset('js/datatables.min.js') }}?v=<?php echo time();?>"></script>
 
         <script type="text/javascript">
 
