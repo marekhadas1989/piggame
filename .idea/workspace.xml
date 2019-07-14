@@ -4,7 +4,6 @@
     <list default="true" id="72c58cf5-6f06-4479-9ee5-581794602ea3" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/public/css/app.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/css/app.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/js/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/js/app.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resources/views/home.blade.php" beforeDir="false" afterPath="$PROJECT_DIR$/resources/views/home.blade.php" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -33,7 +32,7 @@
         <entry file="file://$PROJECT_DIR$/resources/views/home.blade.php">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="271">
-              <caret line="256" column="75" selection-start-line="256" selection-start-column="75" selection-end-line="256" selection-end-column="75" />
+              <caret line="22" column="58" selection-start-line="22" selection-start-column="55" selection-end-line="22" selection-end-column="58" />
               <folding>
                 <element signature="n#style#0;n#div#0;n#div#4;n#body#0;n#html#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#img#0;n#div#0;n#div#0;n#div#4;n#body#0;n#html#0;n#!!top" expanded="true" />
@@ -52,13 +51,17 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/public/js/app.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="237">
-              <caret line="1053" column="42" selection-start-line="1053" selection-start-column="42" selection-end-line="1053" selection-end-column="42" />
+            <state relative-caret-position="407">
+              <caret line="1067" column="22" selection-start-line="1067" selection-start-column="22" selection-end-line="1067" selection-end-column="22" />
               <folding>
+                <element signature="n#style#0;n#div#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#span#0;n#div#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#img#0;n#td#0;n#tr#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#div#0;n#div#0;n#td#3;n#tr#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#h6#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#h5#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#h6#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#img#0;n#h6#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#span#0;n#h6#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#input#0;n#label#0;n#div#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#img#0;n#label#0;n#div#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#h6#0;n#!!top" expanded="true" />
@@ -70,8 +73,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/public/css/app.css">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="220">
-              <caret line="34" selection-start-line="34" selection-end-line="34" />
+            <state relative-caret-position="118">
+              <caret line="18" column="1" lean-forward="true" selection-start-line="18" selection-start-column="1" selection-end-line="18" selection-end-column="1" />
             </state>
           </provider>
         </entry>
@@ -87,19 +90,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>player_class</find>
-      <find>mockup</find>
-      <find>channel</find>
-      <find>selectedC</find>
-      <find>aasdsadsdasdall</find>
-      <find>notify</find>
-      <find>notifyUserNewMessage</find>
-      <find>chatUserName</find>
-      <find>interval</find>
-      <find>chatUse</find>
-      <find>addNewChatUser</find>
-      <find>console</find>
-      <find>openGameSearch</find>
       <find>chat</find>
       <find>createNewChatChanel</find>
       <find>selectedChatUser</find>
@@ -108,7 +98,6 @@
       <find>chatSubmit</find>
       <find>se</find>
       <find>chatMessage</find>
-      <find>console.log</find>
       <find>addMessageToChat</find>
       <find>h5</find>
       <find>user_chat_notification</find>
@@ -117,6 +106,20 @@
       <find>chat_box</find>
       <find>user_chat_n</find>
       <find>user_</find>
+      <find>user_chat_no</find>
+      <find>red</find>
+      <find>margin-top:5px</find>
+      <find>chatText</find>
+      <find>canSendMessage</find>
+      <find>sound/</find>
+      <find>addNewChatUser</find>
+      <find>openGameSearch</find>
+      <find>chatChan</find>
+      <find>joinGame</find>
+      <find>join_game_final</find>
+      <find>console.log</find>
+      <find>removePlayerFromGame</find>
+      <find>deletePlayerFromList</find>
     </findStrings>
     <replaceStrings>
       <replace>myGame</replace>
@@ -137,8 +140,8 @@
         <option value="$PROJECT_DIR$/index.html" />
         <option value="$PROJECT_DIR$/resources/js/datatables.min.js" />
         <option value="$PROJECT_DIR$/routes/web.php" />
-        <option value="$PROJECT_DIR$/public/css/app.css" />
         <option value="$PROJECT_DIR$/resources/views/home.blade.php" />
+        <option value="$PROJECT_DIR$/public/css/app.css" />
         <option value="$PROJECT_DIR$/public/js/app.js" />
       </list>
     </option>
@@ -313,12 +316,12 @@
       <workItem from="1562005994829" duration="19788000" />
       <workItem from="1563026582977" duration="609000" />
       <workItem from="1563038049939" duration="600000" />
-      <workItem from="1563092699841" duration="26993000" />
+      <workItem from="1563092699841" duration="32333000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="105286000" />
+    <option name="totallyTimeSpent" value="110626000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1672" y="-44" width="1696" height="1026" extended-state="6" />
@@ -410,24 +413,10 @@
     <entry file="file://$PROJECT_DIR$/public/img/game.jpg">
       <provider selected="true" editor-type-id="images" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/public/css/app.css">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="220">
-          <caret line="34" selection-start-line="34" selection-end-line="34" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/routes/web.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="119">
-          <caret line="16" selection-start-line="16" selection-end-line="16" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/resources/views/home.blade.php">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="271">
-          <caret line="256" column="75" selection-start-line="256" selection-start-column="75" selection-end-line="256" selection-end-column="75" />
+          <caret line="22" column="58" selection-start-line="22" selection-start-column="55" selection-end-line="22" selection-end-column="58" />
           <folding>
             <element signature="n#style#0;n#div#0;n#div#4;n#body#0;n#html#0;n#!!top" expanded="true" />
             <element signature="n#style#0;n#img#0;n#div#0;n#div#0;n#div#4;n#body#0;n#html#0;n#!!top" expanded="true" />
@@ -442,15 +431,33 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/routes/web.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="119">
+          <caret line="16" selection-start-line="16" selection-end-line="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/public/css/app.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="118">
+          <caret line="18" column="1" lean-forward="true" selection-start-line="18" selection-start-column="1" selection-end-line="18" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/public/js/app.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="237">
-          <caret line="1053" column="42" selection-start-line="1053" selection-start-column="42" selection-end-line="1053" selection-end-column="42" />
+        <state relative-caret-position="407">
+          <caret line="1067" column="22" selection-start-line="1067" selection-start-column="22" selection-end-line="1067" selection-end-column="22" />
           <folding>
+            <element signature="n#style#0;n#div#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#span#0;n#div#0;n#!!top" expanded="true" />
             <element signature="n#style#0;n#img#0;n#td#0;n#tr#0;n#!!top" expanded="true" />
             <element signature="n#style#0;n#div#0;n#div#0;n#td#3;n#tr#0;n#!!top" expanded="true" />
             <element signature="n#style#0;n#h6#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#h5#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#h6#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#img#0;n#h6#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#span#0;n#h6#0;n#!!top" expanded="true" />
             <element signature="n#style#0;n#input#0;n#label#0;n#div#0;n#!!top" expanded="true" />
             <element signature="n#style#0;n#img#0;n#label#0;n#div#0;n#!!top" expanded="true" />
             <element signature="n#style#0;n#h6#0;n#!!top" expanded="true" />

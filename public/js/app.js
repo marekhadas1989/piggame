@@ -112,8 +112,11 @@ var app =(function(obj){
 		if(this.settings.hasOwnProperty("playSounds") && this.settings["playSounds"]){
 			try{
 				var audio = new Audio(sound);
-				audio.play();
+				audio.play().catch(function(e) {
+					console.warn(e);
+				});
 			}catch(e){
+				console.warn(e)
 				//just in case if its not supported by the browser
 			}
 		}
@@ -186,8 +189,12 @@ var app =(function(obj){
 
 			})
 
-			$('.chatText').on('keyup',function(){
-				self.canSendMessage();
+			$('.chatText').on('keyup',function(e){
+				var canSend = self.canSendMessage();
+
+				if(e.keyCode == 13 && canSend){
+					$('.chatSubmit').click();
+				};
 			})
 
 			$('.user_chat_display').on('click',function(){
@@ -430,15 +437,21 @@ var app =(function(obj){
 	},
 	addMessageToChat:function(message,recipent,userData){
 
-
 		var msg =
-			"<div class='row' margin-top:5px>"+
+			"<div class='row' style='margin-top:5px'>"+
 				this.playerMockup(userData.userAvatar,userData.userName,this.clientID,false)+
 				"<div class='col-md-12'>"+message+"</div>"+
 			"</div>";
 
 		$('.chatChanel[chanel="'+recipent+'"]').append(msg);
 
+		this.scrollChatWindow(recipent);
+
+	},
+	scrollChatWindow:function(chanel){
+		setTimeout(function(){
+			$('.chatChanel[chanel="'+chanel+'"]').scrollTop(100000);
+		},100)
 	},
 	playerMockup:function(playerAvatar,playerName,clientID,owner = true){
 
@@ -447,7 +460,7 @@ var app =(function(obj){
 		var mock =
 		'<div class="col-md-12 text-left player_list" clientID="'+clientID+'">' +
 			'<img src="'+playerAvatar+'">' +
-			'<span class="align-middle"> '+playerName+'</span>'
+			'<span style="font-size:12px;color:#17a2b8" class="align-middle"> '+playerName+'</span>'
 			+canDelete+
 		'</div>';
 
@@ -828,8 +841,9 @@ var app =(function(obj){
 				if(message.hasOwnProperty('openGameSearch')){
 					//if i am hosting anything, respond back to the client
 
+
 					//add new user to chat list
-					self.addNewChatUser(message.chatUserName,message.clientID);
+					self.addNewChatUser(message.chatUserName,message.clientID,message.userAvatar);
 
 					if(Object.keys(self.myGame).length){
 						self.sendBroadcastMessage({
@@ -899,11 +913,7 @@ var app =(function(obj){
 					self.showRemoteGamePlayers(message.playerList,false);
 				}else if(message.hasOwnProperty('chatMessage')){
 
-
 					if(message.recipent == 'all' || message.recipent == self.clientID){
-
-						console.log(message.recipent=='all'?'all':self.clientID);
-						console.log(message.recipent=='all'?'all':message.clientID);
 
 						self.notifyUserNewMessage(message.recipent=='all'?'all':message.clientID);
 						self.addMessageToChat(message.messageValue,message.recipent=='all'?'all':message.clientID,message.userData);
@@ -913,6 +923,9 @@ var app =(function(obj){
 				}else if(message.hasOwnProperty('removeOldChat')){
 					$('h6[recipent="'+message.clientID+'"]').remove();
 					$('.chatChanel[recipent="'+message.clientID+'"]').remove();
+				}else if(message.hasOwnProperty('deletePlayerFromList')){
+
+					self.removePlayerFromGame(message.playerID,message.playerName);
 				};
 
 				$('.debug_receive').append('<h6 style="color:green;font-weight:bold">'+e+'</h6>');
@@ -925,7 +938,8 @@ var app =(function(obj){
 						'clientID'			:	self.clientID,
 						'openGameSearch'	:	true,
 						'newUserSearch'		: 	true,
-						'chatUserName'		:	$('.multiplayer_player_name').val()
+						'chatUserName'		:	$('.multiplayer_player_name').val(),
+						'userAvatar'		: 	$('.player_avatar').attr('src')
 					})
 				}
 				,1000
@@ -942,6 +956,9 @@ var app =(function(obj){
 
 		$('.go_back_host').on('click',function(){
 
+			$('.multiplayer_player_name').removeAttr('disabled');
+			var player_name = $('.multiplayer_player_name').val();
+
 			$(".remoteGameControllsStart").hide();
 			$(".remoteGameControlls").show();
 
@@ -949,6 +966,14 @@ var app =(function(obj){
 
 			$(".remotePlayersTitle,.players_list_remote").hide();
 			$(".remoteGamesTitle,.remoteGameList").show();
+
+			self.sendBroadcastMessage({
+				'playerID'				:	self.clientID,
+				'deletePlayerFromList'	: 	true,
+				'playerName'			:	player_name
+			});
+
+			self.canJoinGame();
 
 			if(Object.keys(self.myGame).length) {
 
@@ -1032,13 +1057,33 @@ var app =(function(obj){
 		})
 
 	},
-	addNewChatUser(userName,clientID){
+	removePlayerFromGame:function(playerID,playerName){
+
+		if(playerName in this.myGame.playersList){
+			this.myGame.playersCount--;
+
+			delete this.myGame.playersList[playerName];
+
+			console.log('.player_list[clientid="'+playerID+'"]');
+			$('.player_list[clientid="'+playerID+'"]').remove();
+
+		}
+
+	},
+	addNewChatUser(userName,clientID,userAvatar){
 
 		if(!(clientID in this.chatUsers) && clientID != this.clientID) {
 
 			//add new user to chat list
 			this.chatUsers[clientID] = userName;
-			$('.chatUsers').append('<h6 recipent="' + clientID + '" style="cursor:pointer;color:#17a2b8">' + (userName || clientID) + '</h6>');
+
+			var user_mockup =
+				'<h6 recipent="' + clientID + '" style="cursor:pointer;color:#17a2b8">' +
+					'<img style="height:25px;width:25px" src="'+userAvatar+'">' +
+					'<span style="margin-left:5px">' + (userName || clientID) + '</span>' +
+				'</h6>';
+
+			$('.chatUsers').append(user_mockup);
 
 			this.createNewChatChanel(clientID);
 		}else{
@@ -1056,6 +1101,7 @@ var app =(function(obj){
 			$('.user_chat_notification').show().attr('chanel',chanel);
 
 			this.playSound('/sound/message.mp3');
+			this.scrollChatWindow(chanel);
 		}
 
 	},
@@ -1067,6 +1113,10 @@ var app =(function(obj){
 
 		$(".remotePlayersTitle,.players_list_remote").show();
 		$(".remoteGamesTitle,.remoteGameList").hide();
+
+		if(!owner){
+			$('.start_host_game_final').hide();
+		}
 
 		for(var player in playersList){
 
@@ -1121,11 +1171,15 @@ var app =(function(obj){
 	},
 	canSendMessage:function(){
 
+		var canSendEnter = false;
 		if($('.chatUsers').find('.selectedChatUser').length > 0 && $('.chatText').val().length>0){
 			$('.chatSubmit').removeAttr('disabled');
+			canSendEnter = true;
 		}else{
 			$('.chatSubmit').attr('disabled','disabled');
 		}
+
+		return canSendEnter;
 	},
 	showUserChat:function(){
 

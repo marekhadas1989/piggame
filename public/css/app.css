@@ -26,7 +26,7 @@ body{
 }
 
 .chatChanel{
-  border:solid 1px red;
+  border:solid 1px #bcbaba;
   border-radius:4px;
   height:420px;
   margin-bottom:10px;
