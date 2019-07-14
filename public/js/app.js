@@ -1,4 +1,5 @@
 var app =(function(obj){
+	"use strict";
 	return {
 		start:function(options){
 			obj.init(options);
@@ -403,6 +404,16 @@ var app =(function(obj){
 			//remove players from players list
 			$('body').on('click','.remove_player',function(){
 
+				var isWebSocketBased = $(this).parent().attr('clientid') || false;
+
+				if(isWebSocketBased){
+					self.sendBroadcastMessage({
+						'playerRemovedByOwner' 	:	true,
+						'clientID'				:	isWebSocketBased
+					})
+				}
+
+
 				var user_name = $.trim($(this).parent().find('span').eq(0).text());
 
 				//remove user from users array
@@ -585,7 +596,6 @@ var app =(function(obj){
 				dots.push({x: x, y: y});
 				y = size * (1 - padding);
 				dots.push({x: x, y: y});
-				//for(var i=0; i<dots.length; i++) console.log(dots[i]);
 
 				var dotsToDraw;
 				if (value == 1) dotsToDraw = [3];
@@ -647,11 +657,20 @@ var app =(function(obj){
 	/*
 	Check if at least two players are added to the game and unlock start button if so, otherwise disable start button
 	 */
-	checkIfGameIsReady:function(){
-		if($('.players_list').children('div').length>=2){
-			$('.start_game_final').removeAttr('disabled');
+	checkIfGameIsReady:function(SocketBased){
+
+		if(SocketBased){
+			if($('.players_list').children('div').length>=1){
+				$('.start_host_game_final').removeAttr('disabled');
+			}else{
+				$('.start_host_game_final').attr('disabled','disabled');
+			}
 		}else{
-			$('.start_game_final').attr('disabled','disabled');
+			if($('.players_list').children('div').length>=2){
+				$('.start_game_final').removeAttr('disabled');
+			}else{
+				$('.start_game_final').attr('disabled','disabled');
+			}
 		}
 	},
 	resetPlayer:function(){
@@ -861,18 +880,29 @@ var app =(function(obj){
 					//add new game to the list
 					self.handleNewRemoteGame(message);
 
-				}else if(message.hasOwnProperty('deleteGameFromList')){
+				}else if(message.hasOwnProperty('deleteGameFromList') || message.hasOwnProperty('gameRemovedForcefully')){
 
 					//inform users whether game has been terminated only when game is started and there are players
-					if(message.hasOwnProperty('gameRemovedForcefully')){
-						alert('Game has been terminated by the owner');
-					}
 
-					//delete game from list
-					$('.player_class[game_name="'+message.deleteGameFromList+'"]').remove();
+					var server_id = $('.go_back_host').attr('server_id') || false;
 
-					if($('.remoteGameList').children().length<=0){
-						self.addAwaitingGames();
+					//proceed only if i was participating in the game
+					if(server_id == message.clientID){
+						Swal.fire({
+							title: 'Error!',
+							text: 'Game has been terminated by the owner',
+							type: 'error',
+							confirmButtonText: 'OK'
+						})
+
+						$('.go_back_host').click();
+
+						//delete game from list
+						$('.player_class[game_name="'+message.deleteGameFromList+'"]').remove();
+
+						if($('.remoteGameList').children().length<=0){
+							self.addAwaitingGames();
+						}
 					}
 
 				//Join Game Init function if new player is about to join the game
@@ -894,7 +924,8 @@ var app =(function(obj){
 
 							//send message to the client so to inform the game is ready
 							self.sendBroadcastMessage({
-								'clientID'			:	self.clientID,
+								'serverID'			:	self.clientID,
+								'clientID'			:	message.clientID,
 								'playersCount'		:	self.myGame.playersCount,
 								'playerJoinedGame'	:	true,
 								'playerList'		:	self.myGame.playersList
@@ -903,14 +934,18 @@ var app =(function(obj){
 							self.showRemoteGamePlayers(self.myGame.playersList,true);
 
 						}else{
-							alert('Player already exists, choose a different name for you player');
+
+							self.sendBroadcastMessage({
+								'clientID'			:	message.clientID,
+								'playerExists'		:	true,
+							})
 						}
 
 					}
 
 				//if player joined the game successfully
 				}else if(message.hasOwnProperty('playerJoinedGame')){
-					self.showRemoteGamePlayers(message.playerList,false);
+					self.showRemoteGamePlayers(message.playerList,false,message.serverID);
 				}else if(message.hasOwnProperty('chatMessage')){
 
 					if(message.recipent == 'all' || message.recipent == self.clientID){
@@ -924,8 +959,27 @@ var app =(function(obj){
 					$('h6[recipent="'+message.clientID+'"]').remove();
 					$('.chatChanel[recipent="'+message.clientID+'"]').remove();
 				}else if(message.hasOwnProperty('deletePlayerFromList')){
-
 					self.removePlayerFromGame(message.playerID,message.playerName);
+					self.checkAwaitingPlayers();
+				}else if(message.hasOwnProperty('playerExists')){
+					if(self.clientID == message.clientID){
+						Swal.fire({
+							title: 'Error!',
+							text: 'Player already exists, choose a different name for you player',
+							type: 'error',
+							confirmButtonText: 'OK'
+						})
+					}
+				}else if(message.hasOwnProperty('playerRemovedByOwner')){
+					if(message.clientID == self.clientID){
+						Swal.fire({
+							title: 'Error!',
+							text: 'You have been removed from this game by the owner',
+							type: 'error',
+							confirmButtonText: 'OK'
+						})
+						$('.go_back_host').click();
+					}
 				};
 
 				$('.debug_receive').append('<h6 style="color:green;font-weight:bold">'+e+'</h6>');
@@ -967,14 +1021,7 @@ var app =(function(obj){
 			$(".remotePlayersTitle,.players_list_remote").hide();
 			$(".remoteGamesTitle,.remoteGameList").show();
 
-			self.sendBroadcastMessage({
-				'playerID'				:	self.clientID,
-				'deletePlayerFromList'	: 	true,
-				'playerName'			:	player_name
-			});
-
-			self.canJoinGame();
-
+			//it this is my game
 			if(Object.keys(self.myGame).length) {
 
 				self.sendBroadcastMessage({
@@ -982,14 +1029,35 @@ var app =(function(obj){
 					'deleteGameFromList'	: 	self.myGame.gameName
 				});
 
+				//remove all players from my screen as i was the owner
+				$('.player_list').remove();
+
 				self.myGame = {};
 
+			}else{
+
+				//delete locally as well
+				try{
+					var remote_server_id = $(this).attr('server_id');
+						$('.player_list[clientid="'+remote_server_id+'"]').remove();
+				}finally{
+				//log
+				}
+
+				//delete from remote host
+				self.sendBroadcastMessage({
+					'playerID'				:	self.clientID,
+					'deletePlayerFromList'	: 	true,
+					'playerName'			:	player_name
+				});
 			}
+
+			self.canJoinGame();
 
 		})
 
 		$('.host_game_final').on('click',function(){
-			console.warn('host game');
+			self.checkAwaitingPlayers();
 
 			var newNameGame = $('.multiplayer_game_name').val();
 
@@ -1037,6 +1105,8 @@ var app =(function(obj){
 				//game already exists or was created by someone else and it's still active
 			}
 
+
+
 		})
 
 		$('.join_game_final').on('click',function(){
@@ -1057,16 +1127,29 @@ var app =(function(obj){
 		})
 
 	},
+	checkAwaitingPlayers:function(){
+
+		if($('.player_list').length){
+			$('#awaitingForPlayers').hide();
+		}else{
+			$('#awaitingForPlayers').show();
+		}
+	},
+	/*
+		Remove player from owner's game [server] | this is initiated by the player
+ 	*/
 	removePlayerFromGame:function(playerID,playerName){
 
-		if(playerName in this.myGame.playersList){
-			this.myGame.playersCount--;
+		try{
 
-			delete this.myGame.playersList[playerName];
+			if(playerName in this.myGame.playersList){
+				this.myGame.playersCount--;
+				delete this.myGame.playersList[playerName];
+				$('.player_list[clientid="'+playerID+'"]').remove();
+			}
 
-			console.log('.player_list[clientid="'+playerID+'"]');
-			$('.player_list[clientid="'+playerID+'"]').remove();
-
+		}catch(e){
+			//if it was initiated by the server,this is fine
 		}
 
 	},
@@ -1105,7 +1188,7 @@ var app =(function(obj){
 		}
 
 	},
-	showRemoteGamePlayers:function(playersList,owner){
+	showRemoteGamePlayers:function(playersList,owner,remoteServerID){
 
 		$('.multiplayer_game_name,.multiplayer_player_name').attr("disabled","disabled");
 		$(".remoteGameControllsStart").show();
@@ -1116,6 +1199,9 @@ var app =(function(obj){
 
 		if(!owner){
 			$('.start_host_game_final').hide();
+			$('.go_back_host').attr('server_id',remoteServerID);
+		}else{
+			$('.go_back_host').removeAttr('server_id');
 		}
 
 		for(var player in playersList){
@@ -1125,14 +1211,15 @@ var app =(function(obj){
 					this.playerMockup(
 						playersList[player].userAvatar,
 						playersList[player].userName,
-						this.clientID,
+						playersList[player].playerID,
 						owner
 					)
 				);
 			}
 		}
 
-		$('#awaitingForPlayers').hide();
+		this.checkAwaitingPlayers();
+
 	},
 	addAwaitingGames:function(){
 		$('.remoteGameList').append('<div id="awaitingForGames" class="col-md-12 align-center">Awaiting for games available...</div>');

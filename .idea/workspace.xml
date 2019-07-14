@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="72c58cf5-6f06-4479-9ee5-581794602ea3" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/public/css/app.css" beforeDir="false" afterPath="$PROJECT_DIR$/public/css/app.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/public/js/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/js/app.js" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -51,8 +50,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/public/js/app.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="407">
-              <caret line="1067" column="22" selection-start-line="1067" selection-start-column="22" selection-end-line="1067" selection-end-column="22" />
+            <state relative-caret-position="331">
+              <caret line="892" column="36" selection-start-line="892" selection-start-column="36" selection-end-line="892" selection-end-column="36" />
               <folding>
                 <element signature="n#style#0;n#div#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#span#0;n#div#0;n#!!top" expanded="true" />
@@ -90,36 +89,36 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>chat</find>
-      <find>createNewChatChanel</find>
-      <find>selectedChatUser</find>
-      <find>chatUsers</find>
-      <find>chatChanel</find>
-      <find>chatSubmit</find>
-      <find>se</find>
-      <find>chatMessage</find>
-      <find>addMessageToChat</find>
-      <find>h5</find>
-      <find>user_chat_notification</find>
-      <find>h6</find>
-      <find>showUserChat</find>
-      <find>chat_box</find>
-      <find>user_chat_n</find>
-      <find>user_</find>
-      <find>user_chat_no</find>
-      <find>red</find>
-      <find>margin-top:5px</find>
-      <find>chatText</find>
-      <find>canSendMessage</find>
       <find>sound/</find>
       <find>addNewChatUser</find>
       <find>openGameSearch</find>
       <find>chatChan</find>
-      <find>joinGame</find>
       <find>join_game_final</find>
+      <find>player_list</find>
+      <find>playerMockup</find>
+      <find>this.myGame.playersList</find>
+      <find>game</find>
+      <find>type</find>
+      <find>checkAwaitingPlayers</find>
+      <find>host_game_final</find>
+      <find>awaitingForPlayers</find>
+      <find>hasOwnPr</find>
+      <find>playerExists</find>
+      <find>hasOwnP</find>
+      <find>joinGame</find>
+      <find>delete</find>
       <find>console.log</find>
+      <find>.player_list[clientid</find>
+      <find>playerJoinedGame</find>
+      <find>showRemoteGamePlayers</find>
+      <find>checkIfGameIsReady</find>
+      <find>removedBy</find>
+      <find>ByOwne</find>
+      <find>gameRemovedForcefully</find>
+      <find>go_back_host</find>
       <find>removePlayerFromGame</find>
       <find>deletePlayerFromList</find>
+      <find>deleteGameFromList</find>
     </findStrings>
     <replaceStrings>
       <replace>myGame</replace>
@@ -235,7 +234,7 @@
     <option name="x" value="1672" />
     <option name="y" value="-44" />
     <option name="width" value="1696" />
-    <option name="height" value="1066" />
+    <option name="height" value="1026" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
@@ -248,23 +247,6 @@
             <path>
               <item name="piggame" type="b2602c69:ProjectViewProjectNode" />
               <item name="piggame" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="piggame" type="b2602c69:ProjectViewProjectNode" />
-              <item name="piggame" type="462c0819:PsiDirectoryNode" />
-              <item name="public" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="piggame" type="b2602c69:ProjectViewProjectNode" />
-              <item name="piggame" type="462c0819:PsiDirectoryNode" />
-              <item name="public" type="462c0819:PsiDirectoryNode" />
-              <item name="img" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="piggame" type="b2602c69:ProjectViewProjectNode" />
-              <item name="piggame" type="462c0819:PsiDirectoryNode" />
-              <item name="public" type="462c0819:PsiDirectoryNode" />
-              <item name="sound" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -316,12 +298,12 @@
       <workItem from="1562005994829" duration="19788000" />
       <workItem from="1563026582977" duration="609000" />
       <workItem from="1563038049939" duration="600000" />
-      <workItem from="1563092699841" duration="32333000" />
+      <workItem from="1563092699841" duration="42018000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="110626000" />
+    <option name="totallyTimeSpent" value="120311000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1672" y="-44" width="1696" height="1026" extended-state="6" />
@@ -447,8 +429,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/public/js/app.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="407">
-          <caret line="1067" column="22" selection-start-line="1067" selection-start-column="22" selection-end-line="1067" selection-end-column="22" />
+        <state relative-caret-position="331">
+          <caret line="892" column="36" selection-start-line="892" selection-start-column="36" selection-end-line="892" selection-end-column="36" />
           <folding>
             <element signature="n#style#0;n#div#0;n#!!top" expanded="true" />
             <element signature="n#style#0;n#span#0;n#div#0;n#!!top" expanded="true" />
