@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="72c58cf5-6f06-4479-9ee5-581794602ea3" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/public/js/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/public/js/app.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/views/home.blade.php" beforeDir="false" afterPath="$PROJECT_DIR$/resources/views/home.blade.php" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -30,8 +31,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/resources/views/home.blade.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="271">
-              <caret line="22" column="58" selection-start-line="22" selection-start-column="55" selection-end-line="22" selection-end-column="58" />
+            <state relative-caret-position="322">
+              <caret line="290" column="59" selection-start-line="290" selection-start-column="38" selection-end-line="290" selection-end-column="59" />
               <folding>
                 <element signature="n#style#0;n#div#0;n#div#4;n#body#0;n#html#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#img#0;n#div#0;n#div#0;n#div#4;n#body#0;n#html#0;n#!!top" expanded="true" />
@@ -39,8 +40,11 @@
                 <element signature="n#style#0;n#div#1;n#div#4;n#body#0;n#html#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#div#0;n#div#0;n#div#1;n#div#4;n#body#0;n#html#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#h5#0;n#div#0;n#div#0;n#div#1;n#div#4;n#body#0;n#html#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#img#0;n#h5#0;n#div#0;n#div#0;n#div#1;n#div#4;n#body#0;n#html#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#div#1;n#div#0;n#div#1;n#div#4;n#body#0;n#html#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#div#5;n#body#0;n#html#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#div#0;n#div#5;n#body#0;n#html#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#div#3;n#div#0;n#div#5;n#body#0;n#html#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#div#1;n#div#5;n#body#0;n#html#0;n#!!top" expanded="true" />
               </folding>
             </state>
@@ -50,9 +54,10 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/public/js/app.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="331">
-              <caret line="892" column="36" selection-start-line="892" selection-start-column="36" selection-end-line="892" selection-end-column="36" />
+            <state relative-caret-position="747">
+              <caret line="630" column="8" selection-start-line="630" selection-start-column="8" selection-end-line="630" selection-end-column="8" />
               <folding>
+                <element signature="n#style#0;n#img#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#div#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#span#0;n#div#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#img#0;n#td#0;n#tr#0;n#!!top" expanded="true" />
@@ -89,36 +94,36 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>sound/</find>
-      <find>addNewChatUser</find>
-      <find>openGameSearch</find>
-      <find>chatChan</find>
-      <find>join_game_final</find>
-      <find>player_list</find>
-      <find>playerMockup</find>
-      <find>this.myGame.playersList</find>
-      <find>game</find>
-      <find>type</find>
-      <find>checkAwaitingPlayers</find>
-      <find>host_game_final</find>
-      <find>awaitingForPlayers</find>
-      <find>hasOwnPr</find>
-      <find>playerExists</find>
-      <find>hasOwnP</find>
-      <find>joinGame</find>
-      <find>delete</find>
-      <find>console.log</find>
-      <find>.player_list[clientid</find>
-      <find>playerJoinedGame</find>
-      <find>showRemoteGamePlayers</find>
-      <find>checkIfGameIsReady</find>
-      <find>removedBy</find>
-      <find>ByOwne</find>
-      <find>gameRemovedForcefully</find>
-      <find>go_back_host</find>
-      <find>removePlayerFromGame</find>
-      <find>deletePlayerFromList</find>
-      <find>deleteGameFromList</find>
+      <find>notify</find>
+      <find>selectedCha</find>
+      <find>selectedCh</find>
+      <find>selectedChatUser</find>
+      <find>&lt;img style=&quot;width:25px;height:25px&quot; class=&quot;activeChat&quot; src=&quot;/img/star.png&quot;&gt;</find>
+      <find>h6 recipent</find>
+      <find>chat</find>
+      <find>h6</find>
+      <find>chatUsers</find>
+      <find>clear_message_ev</find>
+      <find>user_chat_notification</find>
+      <find>activeChat</find>
+      <find>uav</find>
+      <find>hasOwnProp</find>
+      <find>myRemoteGameIsOpen</find>
+      <find>start_host_game_final</find>
+      <find>add_player</find>
+      <find>start_game_final</find>
+      <find>myGame</find>
+      <find>myGame.playersList</find>
+      <find>startRemoteGame</find>
+      <find>prepareRemoteGameBoard</find>
+      <find>is_remote_game</find>
+      <find>pass_turn</find>
+      <find>dice_one</find>
+      <find>drawDice</find>
+      <find>roll_a_dice</find>
+      <find>passRemoteTur</find>
+      <find>passRemoteTurn</find>
+      <find>passYourTurn</find>
     </findStrings>
     <replaceStrings>
       <replace>myGame</replace>
@@ -139,8 +144,8 @@
         <option value="$PROJECT_DIR$/index.html" />
         <option value="$PROJECT_DIR$/resources/js/datatables.min.js" />
         <option value="$PROJECT_DIR$/routes/web.php" />
-        <option value="$PROJECT_DIR$/resources/views/home.blade.php" />
         <option value="$PROJECT_DIR$/public/css/app.css" />
+        <option value="$PROJECT_DIR$/resources/views/home.blade.php" />
         <option value="$PROJECT_DIR$/public/js/app.js" />
       </list>
     </option>
@@ -298,12 +303,12 @@
       <workItem from="1562005994829" duration="19788000" />
       <workItem from="1563026582977" duration="609000" />
       <workItem from="1563038049939" duration="600000" />
-      <workItem from="1563092699841" duration="42018000" />
+      <workItem from="1563092699841" duration="57224000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="120311000" />
+    <option name="totallyTimeSpent" value="135517000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1672" y="-44" width="1696" height="1026" extended-state="6" />
@@ -395,24 +400,6 @@
     <entry file="file://$PROJECT_DIR$/public/img/game.jpg">
       <provider selected="true" editor-type-id="images" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/resources/views/home.blade.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="271">
-          <caret line="22" column="58" selection-start-line="22" selection-start-column="55" selection-end-line="22" selection-end-column="58" />
-          <folding>
-            <element signature="n#style#0;n#div#0;n#div#4;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#img#0;n#div#0;n#div#0;n#div#4;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#img#1;n#div#0;n#div#0;n#div#4;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#div#1;n#div#4;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#div#0;n#div#0;n#div#1;n#div#4;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#h5#0;n#div#0;n#div#0;n#div#1;n#div#4;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#div#5;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#div#0;n#div#5;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#div#1;n#div#5;n#body#0;n#html#0;n#!!top" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/routes/web.php">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="119">
@@ -427,11 +414,33 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/resources/views/home.blade.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="322">
+          <caret line="290" column="59" selection-start-line="290" selection-start-column="38" selection-end-line="290" selection-end-column="59" />
+          <folding>
+            <element signature="n#style#0;n#div#0;n#div#4;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#img#0;n#div#0;n#div#0;n#div#4;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#img#1;n#div#0;n#div#0;n#div#4;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#1;n#div#4;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#div#0;n#div#1;n#div#4;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#h5#0;n#div#0;n#div#0;n#div#1;n#div#4;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#img#0;n#h5#0;n#div#0;n#div#0;n#div#1;n#div#4;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#1;n#div#0;n#div#1;n#div#4;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#5;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#div#5;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#3;n#div#0;n#div#5;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#1;n#div#5;n#body#0;n#html#0;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/public/js/app.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="331">
-          <caret line="892" column="36" selection-start-line="892" selection-start-column="36" selection-end-line="892" selection-end-column="36" />
+        <state relative-caret-position="747">
+          <caret line="630" column="8" selection-start-line="630" selection-start-column="8" selection-end-line="630" selection-end-column="8" />
           <folding>
+            <element signature="n#style#0;n#img#0;n#!!top" expanded="true" />
             <element signature="n#style#0;n#div#0;n#!!top" expanded="true" />
             <element signature="n#style#0;n#span#0;n#div#0;n#!!top" expanded="true" />
             <element signature="n#style#0;n#img#0;n#td#0;n#tr#0;n#!!top" expanded="true" />

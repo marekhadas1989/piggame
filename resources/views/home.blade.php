@@ -244,25 +244,27 @@
 
             </div>
 
-            <div class="chat_box col-md-6" style="display:none;padding:40px;border-radius: 5px;background: white;border: solid 1px #bcbaba;">
+            <div class="chat_box col-md-6" style="display:none;border-radius: 5px;background: white;border: solid 1px #bcbaba;">
 
                 <div class="row">
 
-                    <div class="col-md-4 chatUsers" style="width:100%;height:420px;overflow:auto">
-                        <h5 class="all selectedChatUser" recipent="all" style="cursor:pointer;color:#dc3545">All</h5>
+                    <div class="col-md-4 chatUsers" style="margin-top:20px;width:100%;height:420px;overflow:auto">
+                        <h5 class="all selectedChatUser" recipent="all" style="cursor:pointer;color:#dc3545"><img style="margin-top:-5px;width:25px;height:25px" class="activeChat" src="/img/star.png"><span>All</span>
+
+                        </h5>
                     </div>
 
-                    <div class="col-md-8">
-                        <div class="row">
-                            <div class="col-md-12 chatChanel" chanel="all"></div>
+                    <div class="col-md-8" style="margin-top:20px">
 
-                            <div class="input-group" >
-                                <input type="text" class="chatText form-control" >
-                                <div class="input-group-append">
-                                    <button disabled="disabled" class="chatSubmit btn btn-outline-secondary" type="button">Send</button>
-                                </div>
+                        <div class="col-md-12 chatChanel" chanel="all"></div>
+
+                        <div class="input-group" >
+                            <input type="text" class="chatText form-control" >
+                            <div class="input-group-append">
+                                <button disabled="disabled" class="chatSubmit btn btn-outline-secondary" type="button">Send</button>
                             </div>
                         </div>
+
                     </div>
                 </div>
 
@@ -286,6 +288,9 @@
                     <button class="btn btn-info pass_turn" style="margin-top:20px;color:white;display:none">Hold</button>
                 </div>
 
+                <div class="col-md-12 awaitingForRemoteTurn" style="margin-top:10px;display:none">
+                    Awaiting for your turn...
+                </div>
             </div>
 
             <div class="col-md-12 text-center"

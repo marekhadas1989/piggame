@@ -14,6 +14,7 @@ var app =(function(obj){
 	}()),
 	settings:{},
 	gamesAvailable:{},
+	myRemoteGameIsOpen:false,
 	myGame:{},
 	websocket:false,
 	websocket_game_config:false,
@@ -129,24 +130,25 @@ var app =(function(obj){
 
 		try{
 
-			$('.user_chat_notification').on('click',function(){
+			$('.user_chat_notification').on('click',function(e){
 
 				$('.chat_box').show();
 				self.showUserChat();
 
 				var recipent = $(this).attr('chanel');
 
-
-
 				if(recipent == 'all'){
 					$('h5[recipent="all"]').click();
 				}else{
-
 					$('h6[recipent="'+recipent+'"]').click();
 				}
 
 				$(this).hide();
 
+			})
+
+			$('body').on('click','.start_host_game_final',function(){
+				self.startRemoteGame();
 			})
 
 			//chat user selection
@@ -156,8 +158,21 @@ var app =(function(obj){
 				$('.chatChanel[chanel="'+$(this).attr('recipent')+'"]').show();
 
 				if(!$(this).hasClass('selectedChatUser')){
+
+					$('.activeChat').remove();
+
+					//if private notification is visible turn it off and mark as read
+					if($('.user_chat_notification').is(":visible")){
+
+						$('.user_chat_notification').hide();
+						$('.user_chat_notification').trigger("click",["artifical"]);
+
+					}
+
 					$('.chatUsers').children('h5,h6').removeClass("selectedChatUser");
+					$(this).prepend('<img style="margin-top:-5px;width:25px;height:25px" class="activeChat" src="/img/star.png">');
 					$(this).addClass("selectedChatUser");
+
 				}
 
 				self.canSendMessage();
@@ -174,15 +189,17 @@ var app =(function(obj){
 						'userAvatar'	:	user_img
 					};
 
+				var escape_message = msg.replace(/(<([^>]+)>)/ig,"");
+
 				self.sendBroadcastMessage({
 					'chatMessage'	:	true,
-					"messageValue"	:	msg,
+					"messageValue"	:	escape_message,
 					'clientID'		:	self.clientID,
 					'recipent'		:	$('.selectedChatUser').attr('recipent'),
 					'userData'		:	user_data
 				});
 
-				self.addMessageToChat(msg,$('.selectedChatUser').attr('recipent'),user_data);
+				self.addMessageToChat(escape_message,$('.selectedChatUser').attr('recipent'),user_data);
 
 				$('.chatText').val("");
 
@@ -221,6 +238,7 @@ var app =(function(obj){
 				localStorage.setItem('settings', JSON.stringify(settings));
 
 				self.settings = settings;
+
 			})
 
 			$('.settings').on('click',function(){
@@ -264,11 +282,15 @@ var app =(function(obj){
 
 					$('#users_list tbody').append(
 						self.generateUserOnList(
-							$.trim(user_name),user_image,0,first_player
+							$.trim(user_name),
+							user_image,
+							0,
+							first_player
 						)
 					);
 
 					first_player = false;
+
 				})
 
 				$('.game_board').show();
@@ -277,8 +299,10 @@ var app =(function(obj){
 
 			//select user avatar while adding new user
 			$('.user_avatar_selection').on('click',function(){
+
 				$('.player_avatar').attr('src',$(this).attr('src'));
 				$("#user_avatar").modal("hide");
+
 			})
 
 			//add new player on players list
@@ -287,6 +311,7 @@ var app =(function(obj){
 				var playerAvatar 	= 	$('.player_avatar').attr('src'),
 					playerName 		= 	$.trim($('.player_name').val());
 
+				console.log(self.singlePlayerPlayers);
 				//if user does not exists
 				if(self.singlePlayerPlayers.indexOf(playerAvatar)==-1){
 
@@ -305,13 +330,16 @@ var app =(function(obj){
 					self.checkIfGameIsReady();
 
 				}else{
+
 					Swal.fire({
 						title: 'Error!',
 						text: 'Player already exists, please chose other name.',
 						type: 'error',
 						confirmButtonText: 'OK'
 					})
+
 					return false;
+
 				}
 
 			})
@@ -319,19 +347,25 @@ var app =(function(obj){
 			//roll a dice button
 			$('.roll_a_dice').on('click',function(){
 
+				var isRemoteGame = $(this).attr('is_remote_game') || false;
+
 				self.playSound('/sound/dice_roll.mp3');
 
 				$('.dice_board').show();
 
 				var is_first_player = $('.game_board').find('.active').index() == 0?true:false;
 				if(self.settings.hasOwnProperty("doubleSixAlways") && self.settings["doubleSixAlways"] && is_first_player) {
+
 					var dice_one 			= 	6,
 						dice_two 			= 	6;
+
 					console.warn('You little nasty cheater');
+
 				}else{
 
 					var dice_one 			= 	self.randomize(),
 						dice_two 			= 	self.randomize();
+
 				}
 
 				var overall_score 		= 	Number($('.active').children('td').eq(1).text());
@@ -341,20 +375,52 @@ var app =(function(obj){
 				if(self.settings.hasOwnProperty("unluckyPlayer") && self.settings["unluckyPlayer"] && !is_first_player && overall_score>=88){
 					var dice_one 			= 	1,
 						dice_two 			= 	1;
-					console.warn('whooops someone seems to be unlucky')
+					console.warn('whooops someone seems to be really unlucky')
 				}
 
 				self.drawDice("dice_one",dice_one);
 				self.drawDice("dice_two",dice_two);
 
 				if(dice_one == 1 && dice_two == 1){
+
+					if(isRemoteGame){
+						self.sendBroadcastMessage({
+							"passRemoteTurn"		:	true,
+							"new_overall_score"		:	0,
+							"new_current_score"		:	0,
+							"remotePlayerFailed"	: 	true,
+							"dice_one"				:	dice_one,
+							"dice_two"				:	dice_two,
+						})
+
+						$('.roll_a_dice,.pass_turn').attr('disabled',"disabled");
+					}
+
 					self.snakeEye();
+
 					return;
+
 				}
 
 				if(dice_one == 1 || dice_two == 1){
+
+					if(isRemoteGame) {
+						self.sendBroadcastMessage({
+							"passRemoteTurn"		: 	true,
+							"new_overall_score"		: 	overall_score,
+							"new_current_score"		: 	0,
+							"remotePlayerFailed"	: 	true,
+							"dice_one"				:	dice_one,
+							"dice_two"				:	dice_two,
+						})
+
+						$('.roll_a_dice,.pass_turn').attr('disabled',"disabled");
+					}
+
 					self.snakeEyeHalf(Number(overall_score));
+
 					return;
+
 				}
 
 				var current_score 		= Number($('.active').children('td').eq(2).text()),
@@ -363,10 +429,33 @@ var app =(function(obj){
 				//calculate new overall score if nothing wrong has happened only
 				var new_overall_score 	= 	Number(overall_score) + new_current_score;
 
+				if(isRemoteGame) {
+
+					self.sendBroadcastMessage({
+						"updateRemotePlayerScore"	: 	true,
+						"playerName"				: 	0,
+						"new_current_score"			:	new_current_score,
+						"new_overall_score"			:	new_overall_score,
+						"dice_one"					:	dice_one,
+						"dice_two"					:	dice_two
+					})
+
+				}
+
 				if(new_overall_score>=100){
+
+					if(isRemoteGame) {
+						self.sendBroadcastMessage({
+							"remotePlayerWinTheGame": true,
+							"playerName": 0,
+						})
+					}
+
 					self.youWin($('.active'));
 					self.updateUserProgress($('.active').children('td:last').find('.progress-bar'),100);
+
 					return false;
+
 				}else{
 
 					var odd_or_even = (Number(dice_one) + Number(dice_two))%2;
@@ -381,7 +470,9 @@ var app =(function(obj){
 					$('.active').children('td').eq(2).text("").text(new_current_score);
 
 					$('.pass_turn').show();
+
 				}
+
 			})
 
 			$('.go_back').on('click',function(){
@@ -393,10 +484,28 @@ var app =(function(obj){
 
 			$('.pass_turn').on('click',function(){
 
+				var isRemoteGame = $(this).attr("isRemoteGame") || false;
+
+				if(isRemoteGame){
+
+					$('.roll_a_dice,.pass_turn').attr('disabled',"disabled");
+
+					self.sendBroadcastMessage({
+						"passRemoteTurn"		:	true,
+						"playerOverallScore"	:	Number(active_user.eq(1).text()),
+						"playerProgress"		:	Number(active_user.eq(2).text())
+					})
+
+				}else{
+					$('.roll_a_dice,.pass_turn').removeAttr('disabled');
+				}
+
 				var active_user = $('.active').find('td');
+
 				self.passYourTurn(
 					active_user.eq(1).text(),
-					active_user.eq(2).text()
+					active_user.eq(2).text(),
+					isRemoteGame
 				);
 
 			})
@@ -413,7 +522,6 @@ var app =(function(obj){
 					})
 				}
 
-
 				var user_name = $.trim($(this).parent().find('span').eq(0).text());
 
 				//remove user from users array
@@ -426,6 +534,7 @@ var app =(function(obj){
 				$(this).parent().fadeOut().remove();
 
 				self.checkIfGameIsReady();
+
 			})
 
 			$('.cancel_game').on('click',function(){
@@ -484,13 +593,14 @@ var app =(function(obj){
 
 		progress_bar.css("width",percentage+"%").text(percentage+"%");
 		progress_bar.removeAttr('class').addClass('progress-bar '+this.getProgressClass(percentage));
+
 	},
 	/*
 	Function to handle next turn regardless of whether turn has been
 	passed by the conscious decision of the user
 	or caused by the rules of the game.
 	*/
-	passYourTurn:function(overal_score,round_score){
+	passYourTurn:function(overal_score,round_score,isRemote){
 
 		var el = $('tr.active').children('td');
 
@@ -507,11 +617,21 @@ var app =(function(obj){
 			$('#users_list').find('tbody tr:first').addClass('active');
 		};
 
-
 		$('.pass_turn').hide();
 
-		this.drawEmptyDices();
+		if(isRemote){
+			/*
+			var isYou = $('tr.active').find('td').eq(0).text();
 
+			if(isYou){
+				$('.awaitingForRemoteTurn').hide();
+			}else{
+				$('.awaitingForRemoteTurn').show();
+			}
+		
+			 */
+		}
+		this.drawEmptyDices();
 
 	},
 	/*
@@ -531,6 +651,7 @@ var app =(function(obj){
 		}
 
 		return progress_class;
+
 	},
 	generateUserOnList:function(user_name,user_avatar,user_progress,first_player){
 
@@ -539,17 +660,18 @@ var app =(function(obj){
 		var user_progress = user_progress || 0;
 		user_element  =
 			'<tr role="row" class="'+(first_player?'active':void(0))+'">' +
-			'<td class="text-left"><img src="'+user_avatar+'" style="width:20px">'+user_name+'</td>' +
-			'<td>0</td>' +
-			'<td>0</td>' +
-			'<td>' +
-			'<div class="progress">' +
-			'<div class="progress-bar '+progress_class+'" role="progressbar" style="width: '+user_progress+'%;">'+user_progress+'%</div>' +
-			'</div>' +
-			'</td>' +
+				'<td class="text-left"><img src="'+user_avatar+'" style="width:20px">'+user_name+'</td>' +
+				'<td>0</td>' +
+				'<td>0</td>' +
+				'<td>' +
+					'<div class="progress">' +
+						'<div class="progress-bar '+progress_class+'" role="progressbar" style="width: '+user_progress+'%;">'+user_progress+'%</div>' +
+					'</div>' +
+				'</td>' +
 			'</tr>';
 
 		return user_element;
+
 	},
 	/*
 	Canvas plugin for drawing dices
@@ -651,8 +773,10 @@ var app =(function(obj){
 			}
 
 		}catch(e){
+			console.log(e);
 			//this is fine, empty dices are allowed at this stage
 		}
+
 	},
 	/*
 	Check if at least two players are added to the game and unlock start button if so, otherwise disable start button
@@ -660,7 +784,7 @@ var app =(function(obj){
 	checkIfGameIsReady:function(SocketBased){
 
 		if(SocketBased){
-			if($('.players_list').children('div').length>=1){
+			if($('.players_list_remote').children('.player_list').length>=1){
 				$('.start_host_game_final').removeAttr('disabled');
 			}else{
 				$('.start_host_game_final').attr('disabled','disabled');
@@ -672,17 +796,22 @@ var app =(function(obj){
 				$('.start_game_final').attr('disabled','disabled');
 			}
 		}
+
 	},
 	resetPlayer:function(){
+
 		$('.player_name').val("");
 		$('.add_player').attr('disabled','disabled');
+
 	},
 	/*
 	Draw empty dices so to indicate someones turn has just ended
 	 */
 	drawEmptyDices:function(){
+
 		this.drawDice("dice_one",0);
 		this.drawDice("dice_two",0);
+
 	},
 	/*
 	Snake Eye Sweet Alert
@@ -714,7 +843,6 @@ var app =(function(obj){
 
 		}
 
-
 	},
 	/*
 	Alert if someone rolled out "1" on any of the dices
@@ -726,6 +854,7 @@ var app =(function(obj){
 		this.playSound('/sound/fail_snake.mp3');
 
 		if(this.settings.hasOwnProperty("popupAlerts") && this.settings["popupAlerts"]) {
+
 			Swal.fire({
 				title: 'No luck!',
 				text: 'Woops, You rolled "1" on one of your dices. Pass the dices to another player.',
@@ -735,6 +864,7 @@ var app =(function(obj){
 				this.drawEmptyDices();
 				this.passYourTurn(overall_score,0);
 			})
+
 		}else{
 
 			console.warn('Silently skipping game alerts');
@@ -749,7 +879,9 @@ var app =(function(obj){
 	Play game again with the same people, reset progress bars and other game related stuff
 	 */
 	playAgain:function(){
+
 		this.drawEmptyDices();
+
 		$('#users_list').find('tr').removeAttr('class');
 		$('#users_list').find('tbody tr:first').addClass('active');
 
@@ -758,6 +890,7 @@ var app =(function(obj){
 			$(this).children('td').eq(2).text(0);
 			$(this).children('td:last').find('.progress-bar').removeAttr('class').addClass('progress-bar bg-success').css('width','0%').text('0%');
 		})
+
 	},
 	/*
 	You win allert
@@ -767,7 +900,6 @@ var app =(function(obj){
 		var progress = user_name.children('td:last');
 
 		this.playSound('/sound/win.mp3');
-
 
 		Swal.fire({
 			title: 'You Win!',
@@ -804,18 +936,25 @@ var app =(function(obj){
 		var is_first_player = $('.game_board').find('.active').index() == 0?true:false;
 
 		if(this.settings.hasOwnProperty("funnyAlerts") && this.settings["funnyAlerts"] && !is_first_player){
+
 			try{
+
 				Swal.fire({
 					title: 'Uncle Good Advice',
 					text:this.funny[Math.floor(Math.random()*this.funny.length)],
 					type: 'question'
 				})
 
-			}catch(e){}
+			}catch(e){
+
+			}
+
 		}
+
 	},
 	//this function will display 3 players who won most games
 	hallOfFame:function(){
+
 		var hof = localStorage.getItem('hall_of_fame')?JSON.parse(localStorage.getItem('hall_of_fame')):{};
 
 		if(Object.keys(hof).length > 0){
@@ -828,14 +967,18 @@ var app =(function(obj){
 			$('.hall_of_fame').show();
 
 		}
+
 	},
 	debug:function(){
+
 		console.info('---------------------');
 		console.info('--Available Methods--');
 		console.info('---------------------');
+
 		for(var a in this){
 			console.log(a);
 		}
+
 	},
 	canJoinGame:function(){
 
@@ -853,13 +996,15 @@ var app =(function(obj){
 
 		var self = this;
 
-			this.websocket = new WebSocket('wss://merriemelodies.ddns.net:8008/piggame/');
-			this.websocket.onmessage = function(e) {
-				var message = JSON.parse(e.data);
+		this.websocket = new WebSocket('wss://merriemelodies.ddns.net:8008/piggame/');
+		this.websocket.onmessage = function(e) {
+			var message = JSON.parse(e.data);
 
-				if(message.hasOwnProperty('openGameSearch')){
-					//if i am hosting anything, respond back to the client
+			//if i am hosting anything, respond back to the client
+			if(message.hasOwnProperty('openGameSearch')){
 
+				//if game is still open
+				if(self.myRemoteGameIsOpen){
 
 					//add new user to chat list
 					self.addNewChatUser(message.chatUserName,message.clientID,message.userAvatar);
@@ -874,138 +1019,185 @@ var app =(function(obj){
 
 						});
 					}
-
-				}else if(message.hasOwnProperty('gameName')){
-
-					//add new game to the list
-					self.handleNewRemoteGame(message);
-
-				}else if(message.hasOwnProperty('deleteGameFromList') || message.hasOwnProperty('gameRemovedForcefully')){
-
-					//inform users whether game has been terminated only when game is started and there are players
-
-					var server_id = $('.go_back_host').attr('server_id') || false;
-
-					//proceed only if i was participating in the game
-					if(server_id == message.clientID){
-						Swal.fire({
-							title: 'Error!',
-							text: 'Game has been terminated by the owner',
-							type: 'error',
-							confirmButtonText: 'OK'
-						})
-
-						$('.go_back_host').click();
-
-						//delete game from list
-						$('.player_class[game_name="'+message.deleteGameFromList+'"]').remove();
-
-						if($('.remoteGameList').children().length<=0){
-							self.addAwaitingGames();
-						}
-					}
-
-				//Join Game Init function if new player is about to join the game
-				}else if(message.hasOwnProperty('joinGame')){
-
-					//join existing game
-					if(self.myGame.gameName == message.joinGame){
-
-						if(!(message.playerName in self.myGame.playersList)){
-
-							self.myGame.playersList[message.playerName] = {
-								'playerID'		:	message.clientID,
-								'owner'			:	false,
-								'userName'		:	message.playerName,
-								'userAvatar'	:	message.playerAvatar,
-							}
-							//increment number of players
-							self.myGame.playersCount++;
-
-							//send message to the client so to inform the game is ready
-							self.sendBroadcastMessage({
-								'serverID'			:	self.clientID,
-								'clientID'			:	message.clientID,
-								'playersCount'		:	self.myGame.playersCount,
-								'playerJoinedGame'	:	true,
-								'playerList'		:	self.myGame.playersList
-							})
-
-							self.showRemoteGamePlayers(self.myGame.playersList,true);
-
-						}else{
-
-							self.sendBroadcastMessage({
-								'clientID'			:	message.clientID,
-								'playerExists'		:	true,
-							})
-						}
-
-					}
-
-				//if player joined the game successfully
-				}else if(message.hasOwnProperty('playerJoinedGame')){
-					self.showRemoteGamePlayers(message.playerList,false,message.serverID);
-				}else if(message.hasOwnProperty('chatMessage')){
-
-					if(message.recipent == 'all' || message.recipent == self.clientID){
-
-						self.notifyUserNewMessage(message.recipent=='all'?'all':message.clientID);
-						self.addMessageToChat(message.messageValue,message.recipent=='all'?'all':message.clientID,message.userData);
-
-					};
-
-				}else if(message.hasOwnProperty('removeOldChat')){
-					$('h6[recipent="'+message.clientID+'"]').remove();
-					$('.chatChanel[recipent="'+message.clientID+'"]').remove();
-				}else if(message.hasOwnProperty('deletePlayerFromList')){
-					self.removePlayerFromGame(message.playerID,message.playerName);
-					self.checkAwaitingPlayers();
-				}else if(message.hasOwnProperty('playerExists')){
-					if(self.clientID == message.clientID){
-						Swal.fire({
-							title: 'Error!',
-							text: 'Player already exists, choose a different name for you player',
-							type: 'error',
-							confirmButtonText: 'OK'
-						})
-					}
-				}else if(message.hasOwnProperty('playerRemovedByOwner')){
-					if(message.clientID == self.clientID){
-						Swal.fire({
-							title: 'Error!',
-							text: 'You have been removed from this game by the owner',
-							type: 'error',
-							confirmButtonText: 'OK'
-						})
-						$('.go_back_host').click();
-					}
 				};
 
-				$('.debug_receive').append('<h6 style="color:green;font-weight:bold">'+e+'</h6>');
+			}else if(message.hasOwnProperty('gameName')){
 
-			};
+				//add new game to the list
+				self.handleNewRemoteGame(message);
 
-			setInterval(
-				function(){
-					self.sendBroadcastMessage({
-						'clientID'			:	self.clientID,
-						'openGameSearch'	:	true,
-						'newUserSearch'		: 	true,
-						'chatUserName'		:	$('.multiplayer_player_name').val(),
-						'userAvatar'		: 	$('.player_avatar').attr('src')
+			}else if(message.hasOwnProperty('deleteGameFromList') || message.hasOwnProperty('gameRemovedForcefully')){
+
+				//inform users whether game has been terminated only when game is started and there are players
+
+				var server_id = $('.go_back_host').attr('server_id') || false;
+
+				//proceed only if i was participating in the game
+				if(server_id == message.clientID){
+					Swal.fire({
+						title: 'Error!',
+						text: 'Game has been terminated by the owner',
+						type: 'error',
+						confirmButtonText: 'OK'
+					})
+
+					$('.go_back_host').click();
+
+					//delete game from list
+					$('.player_class[game_name="'+message.deleteGameFromList+'"]').remove();
+
+					if($('.remoteGameList').children().length<=0){
+						self.addAwaitingGames();
+					}
+				}
+
+			//Join Game Init function if new player is about to join the game
+			}else if(message.hasOwnProperty('joinGame')){
+
+
+				//join existing game
+				if(self.myGame.gameName == message.joinGame){
+
+					if(!(message.playerName in self.myGame.playersList)){
+
+						self.myGame.playersList[message.playerName] = {
+							'playerID'		:	message.clientID,
+							'owner'			:	false,
+							'userName'		:	message.playerName,
+							'userAvatar'	:	message.playerAvatar,
+						}
+						//increment number of players
+						self.myGame.playersCount++;
+
+						//send message to the client so to inform the game is ready
+						self.sendBroadcastMessage({
+							'serverID'			:	self.clientID,
+							'clientID'			:	message.clientID,
+							'playersCount'		:	self.myGame.playersCount,
+							'playerJoinedGame'	:	true,
+							'playerList'		:	self.myGame.playersList
+						})
+
+						self.showRemoteGamePlayers(self.myGame.playersList,true);
+						self.checkIfGameIsReady(true);
+					}else{
+
+						self.sendBroadcastMessage({
+							'clientID'			:	message.clientID,
+							'playerExists'		:	true,
+						})
+					}
+				}
+
+			//if player joined the game successfully
+			}else if(message.hasOwnProperty('playerJoinedGame')){
+				self.showRemoteGamePlayers(message.playerList,false,message.serverID);
+			}else if(message.hasOwnProperty('chatMessage')){
+
+				if(message.recipent == 'all' || message.recipent == self.clientID){
+
+					self.notifyUserNewMessage(message.recipent=='all'?'all':message.clientID);
+					self.addMessageToChat(message.messageValue,message.recipent=='all'?'all':message.clientID,message.userData);
+
+				};
+
+			}else if(message.hasOwnProperty('removeOldChat')){
+
+				$('h6[recipent="'+message.clientID+'"]').remove();
+				$('.chatChanel[recipent="'+message.clientID+'"]').remove();
+
+			}else if(message.hasOwnProperty('deletePlayerFromList')){
+
+				self.removePlayerFromGame(message.playerID,message.playerName);
+				self.checkAwaitingPlayers();
+
+			}else if(message.hasOwnProperty('playerExists')){
+
+				if(self.clientID == message.clientID){
+					Swal.fire({
+						title: 'Error!',
+						text: 'Player already exists, choose a different name for you player',
+						type: 'error',
+						confirmButtonText: 'OK'
 					})
 				}
-				,1000
-			);
+
+			}else if(message.hasOwnProperty('playerRemovedByOwner')){
+
+				if(message.clientID == self.clientID){
+
+					Swal.fire({
+						title: 'Error!',
+						text: 'You have been removed from this game by the owner',
+						type: 'error',
+						confirmButtonText: 'OK'
+					})
+
+					$('.go_back_host').click();
+
+				}
+
+			}else if(message.hasOwnProperty('startRemoteGame')){
+				self.prepareRemoteGameBoard(false,message.playersList);
+			}else if(message.hasOwnProperty('updateRemotePlayerScore')){
+
+				self.drawRemoteDices(message.dice_one,message.dice_two);
+
+				console.log('after');
+				/*
+				"updateRemotePlayerScore"	: 	true,
+					"playerName"				: 	0,
+					"new_current_score"			:	new_current_score,
+					"new_overall_score"			:	new_overall_score,
+					"dice_one"					:	dice_one,
+					"dice_two"					:	dice_two
+				*/
+
+			}else if(message.hasOwnProperty('passRemoteTurn')){
+
+				if(message.remotePlayerFailed){
+					self.drawRemoteDices(message.dice_one,message.dice_two);
+					self.drawEmptyDices();
+					self.passYourTurn(message.new_overall_score, message.new_current_score,true);
+				}else{
+					self.drawEmptyDices();
+					self.passYourTurn(message.new_overall_score, message.new_current_score,true);
+				}
+			}else if(message.hasOwnProperty('remotePlayerWinTheGame')){
+
+				alert('remotePlayerWinTheGame');
+				/*
+				"remotePlayerWinTheGame": true,
+					"playerName": 0,
+				 */
+			};
+
+			$('.debug_receive').append('<h6 style="color:green;font-weight:bold">'+e+'</h6>');
+
+		};
+
+		setInterval(
+			function(){
+				self.sendBroadcastMessage({
+					'clientID'			:	self.clientID,
+					'openGameSearch'	:	true,
+					'newUserSearch'		: 	true,
+					'chatUserName'		:	$('.multiplayer_player_name').val(),
+					'userAvatar'		: 	$('.player_avatar').attr('src')
+				})
+			}
+			,1000
+		);
 
 		$('body').on('click','input[name="game_name"]',function(){
 			self.canJoinGame();
 		})
 
 		$('.multiplayer_game_name,.multiplayer_player_name').on('keyup',function(){
+
 			self.canHostGame();
 			self.canJoinGame();
+
 		})
 
 		$('.go_back_host').on('click',function(){
@@ -1057,6 +1249,10 @@ var app =(function(obj){
 		})
 
 		$('.host_game_final').on('click',function(){
+
+			//make game as ready to join
+			self.myRemoteGameIsOpen = true;
+
 			self.checkAwaitingPlayers();
 
 			var newNameGame = $('.multiplayer_game_name').val();
@@ -1127,6 +1323,16 @@ var app =(function(obj){
 		})
 
 	},
+	drawRemoteDices:function(dice_one,dice_two){
+
+		this.playSound('/sound/dice_roll.mp3');
+
+		$('.dice_board').show();
+
+		this.drawDice("dice_one",Number(dice_one));
+		this.drawDice("dice_two",Number(dice_two));
+
+	},
 	checkAwaitingPlayers:function(){
 
 		if($('.player_list').length){
@@ -1134,6 +1340,7 @@ var app =(function(obj){
 		}else{
 			$('#awaitingForPlayers').show();
 		}
+
 	},
 	/*
 		Remove player from owner's game [server] | this is initiated by the player
@@ -1158,22 +1365,55 @@ var app =(function(obj){
 		if(!(clientID in this.chatUsers) && clientID != this.clientID) {
 
 			//add new user to chat list
-			this.chatUsers[clientID] = userName;
+			this.chatUsers[clientID] = {
+				"userName"		:	userName,
+				"userAvatar"	:	userAvatar
+			};
 
 			var user_mockup =
 				'<h6 recipent="' + clientID + '" style="cursor:pointer;color:#17a2b8">' +
-					'<img style="height:25px;width:25px" src="'+userAvatar+'">' +
+					'<img class="uav" style="height:25px;width:25px" src="'+userAvatar+'">' +
 					'<span style="margin-left:5px">' + (userName || clientID) + '</span>' +
 				'</h6>';
 
 			$('.chatUsers').append(user_mockup);
 
 			this.createNewChatChanel(clientID);
+
 		}else{
+
 			if(this.chatUsers[clientID]!=userName && this.chatUsers[clientID]!=clientID){
-				this.chatUsers[clientID] = userName;
-				$('h6[recipent="'+clientID+'"]').text(userName || clientID);
+				this.chatUsers[clientID][userName] = userName;
+				$('h6[recipent="'+clientID+'"]').children('span').text(userName || clientID);
 			}
+
+			if(this.chatUsers[clientID].userAvatar!=userAvatar && this.chatUsers[clientID]!=clientID){
+				this.chatUsers[clientID].userAvatar = userAvatar;
+				$('h6[recipent="'+clientID+'"]').children('.uav').attr("src",this.chatUsers[clientID]['userAvatar']);
+			}
+
+		}
+
+	},
+	browserTabNotify:function(message){
+
+		var oldTitle = document.title,
+			timeoutId,
+			blink = function() {
+				document.title = document.title == message ? ' ' : message;
+			},
+			clear = function() {
+				clearInterval(timeoutId);
+				document.title = oldTitle;
+				window.onmousemove = null;
+				timeoutId = null;
+			};
+
+		if (!timeoutId) {
+			timeoutId = setInterval(blink, 1000);
+			$('.user_chat_notification').on('click',function(e){
+				clear();
+			});
 		}
 
 	},
@@ -1181,11 +1421,72 @@ var app =(function(obj){
 
 		//if chat is invisible notify or if chat is visible but not for the channel message was received from
 		if(!($('.chat_box').is(":visible")) || !($('.chatChanel[chanel="'+chanel+'"]').is(":visible"))){
+
 			$('.user_chat_notification').show().attr('chanel',chanel);
+
+			//if this is a private message change the browser tab as well
+			if(!($('.chatChanel[chanel="'+chanel+'"]').is(":visible")) && chanel!='all'){
+				this.browserTabNotify("You have new private message on game chat");
+			}
 
 			this.playSound('/sound/message.mp3');
 			this.scrollChatWindow(chanel);
+
 		}
+
+	},
+	prepareRemoteGameBoard:function(isOwner,playersList){
+
+		var self = this;
+
+		$('.game_box').hide();
+		$('.game_board').show();
+
+		$('.roll_a_dice,.pass_turn').attr('is_remote_game',true);
+
+		if(isOwner){
+			var playersList = this.myGame.playersList;
+		}else{
+
+			//mark roll the dices button disabled, owner should start the game
+			$('.roll_a_dice').attr('disabled',"disabled");
+			$('.awaitingForRemoteTurn').show();
+
+			var playersList = playersList;
+
+		}
+
+		for(var players in playersList){
+
+			var player = playersList[players];
+
+			var user_image 	= $(this).children('img').attr('src'),
+				user_name	= $(this).children('span').eq(0).text();
+
+			$('#users_list tbody').append(
+				self.generateUserOnList(
+					$.trim(player.userName),
+					player.userAvatar,
+					0,
+					player.owner
+				)
+			);
+
+		}
+
+	},
+	startRemoteGame:function(){
+
+		//mark game as closed so no one will be able to join during the game
+		this.myRemoteGameIsOpen = false;
+
+		//set board as owner
+		this.prepareRemoteGameBoard(true);
+
+		this.sendBroadcastMessage({
+			'startRemoteGame'	:	true,
+			'playersList'		:	this.myGame.playersList
+		})
 
 	},
 	showRemoteGamePlayers:function(playersList,owner,remoteServerID){
@@ -1216,6 +1517,7 @@ var app =(function(obj){
 					)
 				);
 			}
+
 		}
 
 		this.checkAwaitingPlayers();
@@ -1234,6 +1536,7 @@ var app =(function(obj){
 			'	</label>' +
 			'</div>';
 		return game_html;
+
 	},
 	handleNewRemoteGame(game){
 
@@ -1267,9 +1570,9 @@ var app =(function(obj){
 		}
 
 		return canSendEnter;
+
 	},
 	showUserChat:function(){
-
 
 		if($('.chat_box').is(":visible")){
 			$('.multiplayer').children('div').eq(0).removeClass("col-md-12").addClass("col-md-6");
