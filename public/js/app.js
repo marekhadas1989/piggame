@@ -22,6 +22,7 @@ var app =(function(obj){
 	maxDiceInt:6,
 	singlePlayerPlayers:[],
 	chatUsers:{},
+	myRemotePlayerName:null,
 	funny:[
 		"If you can smile when things go wrong, you already have someone to blame",
 		"The older you are, the harder it is to lose weight, because your body and your fat have become good buddies.",
@@ -311,7 +312,6 @@ var app =(function(obj){
 				var playerAvatar 	= 	$('.player_avatar').attr('src'),
 					playerName 		= 	$.trim($('.player_name').val());
 
-				console.log(self.singlePlayerPlayers);
 				//if user does not exists
 				if(self.singlePlayerPlayers.indexOf(playerAvatar)==-1){
 
@@ -354,6 +354,7 @@ var app =(function(obj){
 				$('.dice_board').show();
 
 				var is_first_player = $('.game_board').find('.active').index() == 0?true:false;
+
 				if(self.settings.hasOwnProperty("doubleSixAlways") && self.settings["doubleSixAlways"] && is_first_player) {
 
 					var dice_one 			= 	6,
@@ -384,6 +385,7 @@ var app =(function(obj){
 				if(dice_one == 1 && dice_two == 1){
 
 					if(isRemoteGame){
+
 						self.sendBroadcastMessage({
 							"passRemoteTurn"		:	true,
 							"new_overall_score"		:	0,
@@ -394,6 +396,7 @@ var app =(function(obj){
 						})
 
 						$('.roll_a_dice,.pass_turn').attr('disabled',"disabled");
+
 					}
 
 					self.snakeEye();
@@ -405,6 +408,7 @@ var app =(function(obj){
 				if(dice_one == 1 || dice_two == 1){
 
 					if(isRemoteGame) {
+
 						self.sendBroadcastMessage({
 							"passRemoteTurn"		: 	true,
 							"new_overall_score"		: 	overall_score,
@@ -415,6 +419,7 @@ var app =(function(obj){
 						})
 
 						$('.roll_a_dice,.pass_turn').attr('disabled',"disabled");
+
 					}
 
 					self.snakeEyeHalf(Number(overall_score));
@@ -445,10 +450,12 @@ var app =(function(obj){
 				if(new_overall_score>=100){
 
 					if(isRemoteGame) {
+
 						self.sendBroadcastMessage({
 							"remotePlayerWinTheGame": true,
 							"playerName": 0,
 						})
+
 					}
 
 					self.youWin($('.active'));
@@ -476,15 +483,19 @@ var app =(function(obj){
 			})
 
 			$('.go_back').on('click',function(){
+
 				$('.player_name').val("");
 				$('.game_box').hide();
 				$('.start').fadeIn();
+
 				self.singlePlayerPlayers = [];
+
 			})
 
 			$('.pass_turn').on('click',function(){
 
-				var isRemoteGame = $(this).attr("isRemoteGame") || false;
+				var isRemoteGame = $(this).attr("is_remote_game") || false;
+				var active_user = $('.active').find('td');
 
 				if(isRemoteGame){
 
@@ -492,15 +503,17 @@ var app =(function(obj){
 
 					self.sendBroadcastMessage({
 						"passRemoteTurn"		:	true,
-						"playerOverallScore"	:	Number(active_user.eq(1).text()),
-						"playerProgress"		:	Number(active_user.eq(2).text())
+						"new_current_score"		:	Number(active_user.eq(1).text()),
+						"new_overall_score"		:	Number(active_user.eq(2).text())
 					})
+
+					
 
 				}else{
 					$('.roll_a_dice,.pass_turn').removeAttr('disabled');
 				}
 
-				var active_user = $('.active').find('td');
+
 
 				self.passYourTurn(
 					active_user.eq(1).text(),
@@ -516,19 +529,23 @@ var app =(function(obj){
 				var isWebSocketBased = $(this).parent().attr('clientid') || false;
 
 				if(isWebSocketBased){
+
 					self.sendBroadcastMessage({
 						'playerRemovedByOwner' 	:	true,
 						'clientID'				:	isWebSocketBased
 					})
+
 				}
 
 				var user_name = $.trim($(this).parent().find('span').eq(0).text());
 
 				//remove user from users array
 				for( var i = 0; i < self.singlePlayerPlayers.length; i++){
+
 					if ( self.singlePlayerPlayers[i] == user_name) {
 						self.singlePlayerPlayers.splice(i, 1);
 					}
+
 				}
 
 				$(this).parent().fadeOut().remove();
@@ -549,9 +566,12 @@ var app =(function(obj){
 	createNewChatChanel:function(chanel){
 
 		if($('.chatChanel[chanel="'+chanel+'"]').length == 0){
+
 			var newChanel = "<div class='col-md-12 chatChanel' chanel='"+chanel+"'>";
+
 			$(newChanel).insertAfter($('.chatChanel[chanel="all"]'));
 			$('.chatChanel[chanel="'+chanel+'"]').hide();
+
 		}
 
 	},
@@ -569,9 +589,11 @@ var app =(function(obj){
 
 	},
 	scrollChatWindow:function(chanel){
+
 		setTimeout(function(){
 			$('.chatChanel[chanel="'+chanel+'"]').scrollTop(100000);
 		},100)
+
 	},
 	playerMockup:function(playerAvatar,playerName,clientID,owner = true){
 
@@ -610,26 +632,31 @@ var app =(function(obj){
 		el.eq(2).text(0);
 
 		if($('tr.active').next().length){
+
 			$('tr.active').next().addClass('active');
 			$('tr.active').eq(0).removeClass('active');
+
 		}else{
+
 			$('tr.active').removeClass('active');
 			$('#users_list').find('tbody tr:first').addClass('active');
+
 		};
 
 		$('.pass_turn').hide();
 
 		if(isRemote){
-			/*
-			var isYou = $('tr.active').find('td').eq(0).text();
+
+			var isYou = $('tr.active').find('td').eq(0).text() == this.myRemotePlayerName || false;
 
 			if(isYou){
 				$('.awaitingForRemoteTurn').hide();
+				$('.roll_a_dice,.pass_turn').removeAttr('disabled');
 			}else{
 				$('.awaitingForRemoteTurn').show();
 			}
-		
-			 */
+
+
 		}
 		this.drawEmptyDices();
 
@@ -773,7 +800,7 @@ var app =(function(obj){
 			}
 
 		}catch(e){
-			console.log(e);
+			//console.log(e);
 			//this is fine, empty dices are allowed at this stage
 		}
 
@@ -982,7 +1009,11 @@ var app =(function(obj){
 	},
 	canJoinGame:function(){
 
-		if($('.multiplayer_player_name').val().length && $('input[name="game_name"]').is(":checked")){
+		var myRemotePlayerName = $('.multiplayer_player_name').val().length;
+
+		this.myRemotePlayerName = $('.multiplayer_player_name').val();
+
+		if(myRemotePlayerName && $('input[name="game_name"]').is(":checked")){
 			$('.join_game_final').removeAttr('disabled');
 		}else{
 			$('.join_game_final').attr('disabled','disabled');
@@ -1143,7 +1174,10 @@ var app =(function(obj){
 
 				self.drawRemoteDices(message.dice_one,message.dice_two);
 
-				console.log('after');
+				self.updateUserProgress($('.active').children('td:last').find('.progress-bar'),message.new_overall_score);
+
+				$('.active').children('td').eq(2).text("").text(message.new_current_score);
+
 				/*
 				"updateRemotePlayerScore"	: 	true,
 					"playerName"				: 	0,
@@ -1157,15 +1191,19 @@ var app =(function(obj){
 
 				if(message.remotePlayerFailed){
 					self.drawRemoteDices(message.dice_one,message.dice_two);
-					self.drawEmptyDices();
-					self.passYourTurn(message.new_overall_score, message.new_current_score,true);
 				}else{
 					self.drawEmptyDices();
-					self.passYourTurn(message.new_overall_score, message.new_current_score,true);
 				}
+
+				self.updateUserProgress($('.active').children('td:last').find('.progress-bar'),message.new_overall_score);
+
+				self.passYourTurn(message.new_overall_score, message.new_current_score,true);
+
+
 			}else if(message.hasOwnProperty('remotePlayerWinTheGame')){
 
 				alert('remotePlayerWinTheGame');
+				self.updateUserProgress($('.active').children('td:last').find('.progress-bar'),100);
 				/*
 				"remotePlayerWinTheGame": true,
 					"playerName": 0,
