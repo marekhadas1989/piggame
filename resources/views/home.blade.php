@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
     <head>
+
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -47,7 +49,7 @@
                         </div>
 
                         <hr>
-                        <h6 class="text-center">Cheat Mode</h6>
+                            <h6 class="text-center">Cheat Mode</h6>
                         <hr>
 
                         <div class="custom-control custom-checkbox mb-3">
@@ -55,17 +57,21 @@
                             <label class="custom-control-label" for="doubleSixAlways">Roll Always "Double 6" For First
                                 Player</label>
                         </div>
+
                         <div class="custom-control custom-checkbox mb-3">
                             <input type="checkbox" class="custom-control-input" id="unluckyPlayer">
-                            <label class="custom-control-label" for="unluckyPlayer">All but "first player" seems to be unlucky
-                                more than usually</label>
+                            <label class="custom-control-label" for="unluckyPlayer">
+                                All but "first player" seems to be unlucky more than usually
+                            </label>
                         </div>
+
                     </div>
 
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                         <button type="button" class="btn btn-primary saveSettings">Save changes</button>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -103,7 +109,7 @@
         </div>
 
         <div class="row start initial_box game_box" style="display:none">
-            <div class="col-md-12 text-center" style="border-radius:5px;background:white;padding:40px;border:solid 1px #bcbaba">
+            <div class="col-md-12 text-center game_box_iner">
 
                 <i class="fas fa-cog settings"></i>
                 <h2 style="color:#563D7C">The Pig Game</h2>
@@ -129,22 +135,6 @@
                 </h6>
             </div>
 
-            <div class="col-md-6 debug_box" style="background:white;display:none">
-                Debug Box
-                <h1>
-                    <textarea type="text" class="form-control debug_text"></textarea>
-                </h1>
-                <button class="btn btn-success btn-sm debug_send" style="margin-top:20px">Send</button>
-                <br>  <br>
-                <h6>Received</h6>
-
-                <div class="row">
-                    <div class="col-md-12 debug_receive" style="max-height: 300px;overflow-y:scroll">
-
-                    </div>
-                </div>
-
-            </div>
 
         </div>
 
@@ -170,10 +160,8 @@
                 </div>
 
                 <div class="col-md-12">
-                    <button class="btn btn-danger add_player" disabled="disabled" style="margin-top:20px">Add New Player
-                    </button>
-                    <button class="btn btn-info start_game_final" disabled="disabled" style="margin-top:20px">Start Game
-                    </button>
+                    <button class="btn btn-danger add_player" disabled="disabled" style="margin-top:20px">Add New Player</button>
+                    <button class="btn btn-info start_game_final" disabled="disabled" style="margin-top:20px">Start Game</button>
                     <button class="btn btn-success go_back" style="margin-top:20px">Go Back</button>
                 </div>
 
@@ -186,7 +174,7 @@
 
                 <div class="user_chat">
                     <img class="user_chat_display" style="width:31px;height:31px;" src="./img/chat.png" class="img-fluid">
-                    <img class="user_chat_notification" style="display:none;width:50px;height:50px;" src="./img/bell.gif" class="img-fluid">
+                    <img class="user_chat_notification" src="./img/bell.gif" class="img-fluid">
 
                 </div>
 
@@ -195,13 +183,6 @@
                 <div class="col-md-12" style="cursor:pointer">
                     <img src="./avatars/128x128/128_1.png" class="img-fluid player_avatar" data-toggle="modal" data-target="#user_avatar">
 
-                    <div class="input-group mb-3" style="margin-top:10px">
-                        <input type="text" class="form-control multiplayer_game_name">
-                        <div class="input-group-append">
-                            <span class="input-group-text">Enter Game Name</span>
-                        </div>
-
-                    </div>
 
                     <div class="input-group mb-3" style="margin-top:10px">
                         <input type="text" class="form-control multiplayer_player_name">
@@ -213,14 +194,14 @@
                 </div>
 
                 <h2 style="color:#563D7C;display:none" class="remotePlayersTitle">Game Players</h2>
-                <div class="row players_list_remote" style="margin:20px 0px 20px 0px;max-height:300px;overflow-y:scroll;display:none">
+                <div class="row players_list_remote" style="display:none">
                     <div id="awaitingForPlayers" class="col-md-12 align-center">
                         Awaiting for players...
                     </div>
                 </div>
 
                 <h2 style="color:#563D7C" class="remoteGamesTitle">Games Available</h2>
-                <div class="row remoteGameList" style="margin:20px 0px 20px 0px;max-height:300px;overflow-y:scroll">
+                <div class="row remoteGameList">
 
 
                     <div id="awaitingForGames" class="col-md-12 align-center">
@@ -244,12 +225,13 @@
 
             </div>
 
-            <div class="chat_box col-md-6" style="display:none;border-radius: 5px;background: white;border: solid 1px #bcbaba;">
+            <div class="chat_box col-md-6">
 
                 <div class="row">
 
-                    <div class="col-md-4 chatUsers" style="margin-top:20px;width:100%;height:420px;overflow:auto">
-                        <h5 class="all selectedChatUser" recipent="all" style="cursor:pointer;color:#dc3545"><img style="margin-top:-5px;width:25px;height:25px" class="activeChat" src="/img/star.png"><span>All</span>
+                    <div class="col-md-4 chatUsers" style="">
+                        <h5 class="all selectedChatUser" recipent="all" style="cursor:pointer;color:#dc3545">
+                            <img class="activeChat" src="/img/star.png"><span>All</span>
 
                         </h5>
                     </div>
@@ -273,7 +255,7 @@
 
         <div class="row game_board game_box" style="display:none">
 
-            <div class="col-md-12 text-center" style="border-radius:5px;background:white;padding:40px;border:solid 1px #bcbaba">
+            <div class="col-md-12 text-center game_board_iner">
                 <h2 style="color:#563D7C">Let's get ready for the rumble</h2>
 
                 <div class="col-md-12 dice_board" style="display:none;margin-top:20px">
@@ -281,7 +263,7 @@
                     <canvas id="dice_two"></canvas>
                 </div>
 
-                <div class="row players_list" style="margin:20px 0px 20px 0px;max-height:300px;overflow-y:scroll"></div>
+                <div class="row players_list"></div>
 
                 <div class="col-md-12">
                     <button class="btn btn-warning roll_a_dice" style="margin-top:20px;color:white">Roll the dices</button>
@@ -293,8 +275,7 @@
                 </div>
             </div>
 
-            <div class="col-md-12 text-center"
-                 style="border-radius:5px;background:white;padding:40px;border:solid 1px #bcbaba;margin-top:10px">
+            <div class="col-md-12 text-center playerListProgress">
 
                 <table id="users_list" class="display dataTable" style="width:100%">
 

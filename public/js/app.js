@@ -50,9 +50,10 @@ var app =(function(obj){
 			}
 		});
 
+		//when browser window is closed
 		$(window).on('unload', function(){
 
-			//removeOldChat
+			//remove user from all chats
 			self.sendBroadcastMessage({
 				'removeOldChat'			: 	true,
 				'clientID'				:	self.clientID
@@ -66,6 +67,7 @@ var app =(function(obj){
 					'deleteGameFromList'	:	self.myGame.gameName
 				});
 			}
+
 		});
 
 		if('debug' in options && options['debug']){
@@ -131,13 +133,16 @@ var app =(function(obj){
 
 		try{
 
+			//bell icon
 			$('.user_chat_notification').on('click',function(e){
 
 				$('.chat_box').show();
 				self.showUserChat();
 
+				//if there are unreaded messages button will have assigned related chanel id
 				var recipent = $(this).attr('chanel');
 
+				//move user to chanel
 				if(recipent == 'all'){
 					$('h5[recipent="all"]').click();
 				}else{
@@ -155,7 +160,10 @@ var app =(function(obj){
 			//chat user selection
 			$('body').on('click','.chatUsers h5,.chatUsers h6',function(){
 
+				//hide all other chats
 				$('.chatChanel').hide();
+
+				//show messages for chat channel
 				$('.chatChanel[chanel="'+$(this).attr('recipent')+'"]').show();
 
 				if(!$(this).hasClass('selectedChatUser')){
@@ -165,14 +173,12 @@ var app =(function(obj){
 					//if private notification is visible turn it off and mark as read
 					if($('.user_chat_notification').is(":visible")){
 
-						$('.user_chat_notification').hide();
-						$('.user_chat_notification').trigger("click",["artifical"]);
+						$('.user_chat_notification').hide().trigger("click",["artifical"]);
 
 					}
 
 					$('.chatUsers').children('h5,h6').removeClass("selectedChatUser");
-					$(this).prepend('<img style="margin-top:-5px;width:25px;height:25px" class="activeChat" src="/img/star.png">');
-					$(this).addClass("selectedChatUser");
+					$(this).prepend('<img class="activeChat" src="/img/star.png">').addClass("selectedChatUser");
 
 				}
 
@@ -190,8 +196,10 @@ var app =(function(obj){
 						'userAvatar'	:	user_img
 					};
 
+				//escape unsafe chars from message specifically html tags
 				var escape_message = msg.replace(/(<([^>]+)>)/ig,"");
 
+				//send message over
 				self.sendBroadcastMessage({
 					'chatMessage'	:	true,
 					"messageValue"	:	escape_message,
@@ -200,32 +208,44 @@ var app =(function(obj){
 					'userData'		:	user_data
 				});
 
-				self.addMessageToChat(escape_message,$('.selectedChatUser').attr('recipent'),user_data);
+				//display message on screen
+				self.addMessageToChat(
+					escape_message,
+					$('.selectedChatUser').attr('recipent'),
+					user_data
+				);
 
 				$('.chatText').val("");
 
+				//clear message box so to type another message
 				self.canSendMessage();
 
 			})
 
+			//check if user typed in anything, if so let user to send a message on chat
 			$('.chatText').on('keyup',function(e){
+
 				var canSend = self.canSendMessage();
 
 				if(e.keyCode == 13 && canSend){
 					$('.chatSubmit').click();
 				};
+
 			})
 
+			//display appropriate chanel
 			$('.user_chat_display').on('click',function(){
 				$('.chat_box').toggle();
 				self.showUserChat();
 			})
 
+			//display multiplayer game box
 			$('.start_multiplayer').on('click',function(){
 				$('.game_box').hide();
 				$('.multiplayer').show();
 			})
 
+			//save game settings
 			$('.saveSettings').on('click',function(){
 
 				var settings = {};
@@ -246,6 +266,7 @@ var app =(function(obj){
 				$('#settingsModal').modal('show');
 			})
 
+			//single player
 			$('.player_name').on('keyup',function(e){
 
 				$(this).val().length>0?$('.add_player').removeAttr('disabled'):$('.add_player').attr('disabled','disabled');
@@ -256,7 +277,7 @@ var app =(function(obj){
 
 			})
 
-			//first screen moves to users list once clicked
+			//single player first screen moves to users list once clicked
 			$('.start_game').on('click',function(){
 
 				//set up initial image and cleanup old players
@@ -272,6 +293,8 @@ var app =(function(obj){
 
 			//start game button once at least two users are added
 			$('.start_game_final').on('click',function(){
+
+				self.drawEmptyDices();
 
 				$('.game_box').hide();
 
@@ -333,7 +356,7 @@ var app =(function(obj){
 
 					Swal.fire({
 						title: 'Error!',
-						text: 'Player already exists, please chose other name.',
+						text: 'Player with following name or avatar already exists, please chose other name.',
 						type: 'error',
 						confirmButtonText: 'OK'
 					})
@@ -488,6 +511,9 @@ var app =(function(obj){
 				$('.game_box').hide();
 				$('.start').fadeIn();
 
+				//show awaiting game info on multiplayer
+				$('.awaitingForGames').show();
+
 				self.singlePlayerPlayers = [];
 
 			})
@@ -507,7 +533,7 @@ var app =(function(obj){
 						"new_overall_score"		:	Number(active_user.eq(2).text())
 					})
 
-					
+
 
 				}else{
 					$('.roll_a_dice,.pass_turn').removeAttr('disabled');
@@ -554,7 +580,8 @@ var app =(function(obj){
 
 			})
 
-			$('.cancel_game').on('click',function(){
+			//cancel local game
+			$('.go_back').on('click',function(){
 				self.resetGame();
 			})
 
@@ -716,7 +743,7 @@ var app =(function(obj){
 
 		try{
 
-			drawDice(ctx, 0, 0, 150, diceValue, diceColor, dotColor);
+			new drawDice(ctx, 0, 0, 150, diceValue, diceColor, dotColor);
 
 			function drawDice(ctx, x, y, size, value, diceColor, dotColor) {
 				dots = [];
@@ -725,6 +752,10 @@ var app =(function(obj){
 				ctx.translate(x, y);
 				roundRect(ctx, 0, 0, size, size, size * 0.1, true, false);
 
+				//if value is 0 then draw only empty dices
+				if(value == 0){
+					return false;
+				}
 				//define dot locations
 				var padding = 0.25;
 				var x, y;
@@ -747,7 +778,8 @@ var app =(function(obj){
 				dots.push({x: x, y: y});
 
 				var dotsToDraw;
-				if (value == 1) dotsToDraw = [3];
+				if (value == 0) dotsToDraw = [0];
+				else if (value == 1) dotsToDraw = [3];
 				else if (value == 2) dotsToDraw = [0, 6];
 				else if (value == 3) dotsToDraw = [0, 3, 6];
 				else if (value == 4) dotsToDraw = [0, 2, 4, 6];
@@ -800,7 +832,7 @@ var app =(function(obj){
 			}
 
 		}catch(e){
-			//console.log(e);
+			console.log(e);
 			//this is fine, empty dices are allowed at this stage
 		}
 
@@ -835,6 +867,8 @@ var app =(function(obj){
 	Draw empty dices so to indicate someones turn has just ended
 	 */
 	drawEmptyDices:function(){
+
+		$('.dice_board').show();
 
 		this.drawDice("dice_one",0);
 		this.drawDice("dice_two",0);
@@ -945,12 +979,16 @@ var app =(function(obj){
 
 	},
 	resetGame:function(){
+
 		this.drawEmptyDices();
+
 		$('.players_list').html("");
 		$(".game_box").hide();
 		$('.initial_box').show();
 		$('#users_list tbody').html("");
+
 		this.singlePlayerPlayers = [];
+
 	},
 	/*
 	Generate random number 1-6
@@ -1021,7 +1059,7 @@ var app =(function(obj){
 
 	},
 	canHostGame:function(){
-		$('.host_game_final')[$('.multiplayer_game_name').val().length && $('.multiplayer_player_name').val().length?'removeAttr':'attr']('disabled','disabled');
+		$('.host_game_final')[$('.multiplayer_player_name').val().length?'removeAttr':'attr']('disabled','disabled');
 	},
 	websockets:function(){
 
@@ -1231,7 +1269,7 @@ var app =(function(obj){
 			self.canJoinGame();
 		})
 
-		$('.multiplayer_game_name,.multiplayer_player_name').on('keyup',function(){
+		$('.multiplayer_player_name').on('keyup',function(){
 
 			self.canHostGame();
 			self.canJoinGame();
@@ -1240,13 +1278,18 @@ var app =(function(obj){
 
 		$('.go_back_host').on('click',function(){
 
+			//set my game as not ready to be broadcasted
+			self.myRemoteGameIsOpen = false;
+
 			$('.multiplayer_player_name').removeAttr('disabled');
+
+			//get value of existing player and broadcast this name to remove from others list
 			var player_name = $('.multiplayer_player_name').val();
 
 			$(".remoteGameControllsStart").hide();
 			$(".remoteGameControlls").show();
 
-			$('.multiplayer_game_name,.multiplayer_player_name').removeAttr("disabled").val("");
+			$('.multiplayer_player_name').removeAttr("disabled").val("");
 
 			$(".remotePlayersTitle,.players_list_remote").hide();
 			$(".remoteGamesTitle,.remoteGameList").show();
@@ -1293,7 +1336,7 @@ var app =(function(obj){
 
 			self.checkAwaitingPlayers();
 
-			var newNameGame = $('.multiplayer_game_name').val();
+			var newNameGame = $('.multiplayer_player_name').val();
 
 			//removing old game
 			if(Object.keys(self.myGame).length){
@@ -1529,7 +1572,7 @@ var app =(function(obj){
 	},
 	showRemoteGamePlayers:function(playersList,owner,remoteServerID){
 
-		$('.multiplayer_game_name,.multiplayer_player_name').attr("disabled","disabled");
+		$('.multiplayer_player_name').attr("disabled","disabled");
 		$(".remoteGameControllsStart").show();
 		$(".remoteGameControlls").hide();
 
